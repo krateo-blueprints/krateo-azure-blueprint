@@ -1,0 +1,216 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "description": "Provision an Azure Network LoadBalancersInboundNatRule via Azure Service Operator. Fields mirror the network.azure.com/v1api20240301 LoadBalancersInboundNatRule spec.",
+  "properties": {
+    "azureName": {
+      "description": "AzureName: The name of the resource in Azure. This is often the same as the name of the resource in Kubernetes but it\ndoesn't have to be.",
+      "type": "string"
+    },
+    "backendAddressPool": {
+      "description": "BackendAddressPool: A reference to backendAddressPool resource.",
+      "properties": {
+        "reference": {
+          "description": "Reference: Resource ID.",
+          "properties": {
+            "armId": {
+              "description": "ARMID is a string of the form /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}.\nThe /resourcegroups/{resourceGroupName} bit is optional as some resources are scoped at the subscription level\nARMID is mutually exclusive with Group, Kind, Namespace and Name.",
+              "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+              "type": "string"
+            },
+            "group": {
+              "description": "Group is the Kubernetes group of the resource.",
+              "type": "string"
+            },
+            "kind": {
+              "description": "Kind is the Kubernetes kind of the resource.",
+              "type": "string"
+            },
+            "name": {
+              "description": "Name is the Kubernetes name of the resource.",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "backendPort": {
+      "description": "BackendPort: The port used for the internal endpoint. Acceptable values range from 1 to 65535.",
+      "type": "integer"
+    },
+    "credentialFrom": {
+      "default": "",
+      "description": "Name of a Kubernetes Secret holding the Azure credential to use for this resource. Rendered as the serviceoperator.azure.com/credential-from annotation. Leave empty to inherit the credential from the namespace, then from the operator's global credential. The resource's subscription and resource group come from spec.owner, not from this field.",
+      "title": "Azure credential Secret",
+      "type": "string"
+    },
+    "enableFloatingIP": {
+      "description": "EnableFloatingIP: Configures a virtual machine's endpoint for the floating IP capability required to configure a SQL\nAlwaysOn Availability Group. This setting is required when using the SQL AlwaysOn Availability Groups in SQL server.\nThis setting can't be changed after you create the endpoint.",
+      "type": "boolean"
+    },
+    "enableTcpReset": {
+      "description": "EnableTcpReset: Receive bidirectional TCP Reset on TCP flow idle timeout or unexpected connection termination. This\nelement is only used when the protocol is set to TCP.",
+      "type": "boolean"
+    },
+    "frontendIPConfiguration": {
+      "description": "FrontendIPConfiguration: A reference to frontend IP addresses.",
+      "properties": {
+        "reference": {
+          "description": "Reference: Resource ID.",
+          "properties": {
+            "armId": {
+              "description": "ARMID is a string of the form /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}.\nThe /resourcegroups/{resourceGroupName} bit is optional as some resources are scoped at the subscription level\nARMID is mutually exclusive with Group, Kind, Namespace and Name.",
+              "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+              "type": "string"
+            },
+            "group": {
+              "description": "Group is the Kubernetes group of the resource.",
+              "type": "string"
+            },
+            "kind": {
+              "description": "Kind is the Kubernetes kind of the resource.",
+              "type": "string"
+            },
+            "name": {
+              "description": "Name is the Kubernetes name of the resource.",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "frontendPort": {
+      "description": "FrontendPort: The port for the external endpoint. Port numbers for each rule must be unique within the Load Balancer.\nAcceptable values range from 1 to 65534.",
+      "type": "integer"
+    },
+    "frontendPortRangeEnd": {
+      "description": "FrontendPortRangeEnd: The port range end for the external endpoint. This property is used together with\nBackendAddressPool and FrontendPortRangeStart. Individual inbound NAT rule port mappings will be created for each\nbackend address from BackendAddressPool. Acceptable values range from 1 to 65534.",
+      "type": "integer"
+    },
+    "frontendPortRangeStart": {
+      "description": "FrontendPortRangeStart: The port range start for the external endpoint. This property is used together with\nBackendAddressPool and FrontendPortRangeEnd. Individual inbound NAT rule port mappings will be created for each backend\naddress from BackendAddressPool. Acceptable values range from 1 to 65534.",
+      "type": "integer"
+    },
+    "idleTimeoutInMinutes": {
+      "description": "IdleTimeoutInMinutes: The timeout for the TCP idle connection. The value can be set between 4 and 30 minutes. The\ndefault value is 4 minutes. This element is only used when the protocol is set to TCP.",
+      "type": "integer"
+    },
+    "operatorSpec": {
+      "description": "OperatorSpec: The specification for configuring operator behavior. This field is interpreted by the operator and not\npassed directly to Azure",
+      "properties": {
+        "configMapExpressions": {
+          "description": "ConfigMapExpressions: configures where to place operator written dynamic ConfigMaps (created with CEL expressions).",
+          "items": {
+            "description": "DestinationExpression is a CEL expression and a destination to store the result in. The destination may\nbe a secret or a configmap. The value of the expression is stored at the specified location in\nthe destination.",
+            "properties": {
+              "annotations": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Annotations is an optional set of annotations to apply to the destination resource.",
+                "type": "object"
+              },
+              "key": {
+                "description": "Key is the key in the ConfigMap or Secret being written to. If the CEL expression in Value returns a string\nthis is required to identify what key to write to. If the CEL expression in Value returns a map[string]string\nKey must not be set, instead the keys written will be determined dynamically based on the keys of the resulting\nmap[string]string.",
+                "type": "string"
+              },
+              "labels": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Labels is an optional set of labels to apply to the destination resource.",
+                "type": "object"
+              },
+              "name": {
+                "description": "Name is the name of the Kubernetes configmap or secret to write to.\nThe configmap or secret will be created in the same namespace as the resource.",
+                "type": "string"
+              },
+              "value": {
+                "description": "Value is a CEL expression. The CEL expression may return a string or a map[string]string. For more information\non CEL in ASO see https://azure.github.io/azure-service-operator/guide/expressions/",
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "value"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "secretExpressions": {
+          "description": "SecretExpressions: configures where to place operator written dynamic secrets (created with CEL expressions).",
+          "items": {
+            "description": "DestinationExpression is a CEL expression and a destination to store the result in. The destination may\nbe a secret or a configmap. The value of the expression is stored at the specified location in\nthe destination.",
+            "properties": {
+              "annotations": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Annotations is an optional set of annotations to apply to the destination resource.",
+                "type": "object"
+              },
+              "key": {
+                "description": "Key is the key in the ConfigMap or Secret being written to. If the CEL expression in Value returns a string\nthis is required to identify what key to write to. If the CEL expression in Value returns a map[string]string\nKey must not be set, instead the keys written will be determined dynamically based on the keys of the resulting\nmap[string]string.",
+                "type": "string"
+              },
+              "labels": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Labels is an optional set of labels to apply to the destination resource.",
+                "type": "object"
+              },
+              "name": {
+                "description": "Name is the name of the Kubernetes configmap or secret to write to.\nThe configmap or secret will be created in the same namespace as the resource.",
+                "type": "string"
+              },
+              "value": {
+                "description": "Value is a CEL expression. The CEL expression may return a string or a map[string]string. For more information\non CEL in ASO see https://azure.github.io/azure-service-operator/guide/expressions/",
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "value"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "owner": {
+      "description": "Owner: The owner of the resource. The owner controls where the resource goes when it is deployed. The owner also\ncontrols the resources lifecycle. When the owner is deleted the resource will also be deleted. Owner is expected to be a\nreference to a network.azure.com/LoadBalancer resource",
+      "properties": {
+        "armId": {
+          "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+          "type": "string"
+        },
+        "name": {
+          "description": "This is the name of the Kubernetes resource to reference.",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "protocol": {
+      "description": "Protocol: The reference to the transport protocol used by the load balancing rule.",
+      "enum": [
+        "All",
+        "Tcp",
+        "Udp"
+      ],
+      "type": "string"
+    }
+  },
+  "required": [
+    "owner"
+  ],
+  "title": "Azure Network LoadBalancersInboundNatRule",
+  "type": "object"
+}

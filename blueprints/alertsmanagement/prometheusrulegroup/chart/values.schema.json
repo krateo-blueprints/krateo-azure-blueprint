@@ -1,0 +1,284 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "description": "Provision an Azure Alertsmanagement PrometheusRuleGroup via Azure Service Operator. Fields mirror the alertsmanagement.azure.com/v1api20230301 PrometheusRuleGroup spec.",
+  "properties": {
+    "azureName": {
+      "description": "AzureName: The name of the resource in Azure. This is often the same as the name of the resource in Kubernetes but it\ndoesn't have to be.",
+      "pattern": "^[^:@/#{}%\u0026+*\u003c\u003e?]+$",
+      "type": "string"
+    },
+    "clusterName": {
+      "description": "ClusterName: Apply rule to data from a specific cluster.",
+      "type": "string"
+    },
+    "credentialFrom": {
+      "default": "",
+      "description": "Name of a Kubernetes Secret holding the Azure credential to use for this resource. Rendered as the serviceoperator.azure.com/credential-from annotation. Leave empty to inherit the credential from the namespace, then from the operator's global credential. The resource's subscription and resource group come from spec.owner, not from this field.",
+      "title": "Azure credential Secret",
+      "type": "string"
+    },
+    "description": {
+      "description": "Description: Rule group description.",
+      "type": "string"
+    },
+    "enabled": {
+      "description": "Enabled: Enable/disable rule group.",
+      "type": "boolean"
+    },
+    "interval": {
+      "description": "Interval: The interval in which to run the Prometheus rule group represented in ISO 8601 duration format. Should be\nbetween 1 and 15 minutes",
+      "type": "string"
+    },
+    "location": {
+      "description": "Location: The geo-location where the resource lives",
+      "type": "string"
+    },
+    "operatorSpec": {
+      "description": "OperatorSpec: The specification for configuring operator behavior. This field is interpreted by the operator and not\npassed directly to Azure",
+      "properties": {
+        "configMapExpressions": {
+          "description": "ConfigMapExpressions: configures where to place operator written dynamic ConfigMaps (created with CEL expressions).",
+          "items": {
+            "description": "DestinationExpression is a CEL expression and a destination to store the result in. The destination may\nbe a secret or a configmap. The value of the expression is stored at the specified location in\nthe destination.",
+            "properties": {
+              "annotations": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Annotations is an optional set of annotations to apply to the destination resource.",
+                "type": "object"
+              },
+              "key": {
+                "description": "Key is the key in the ConfigMap or Secret being written to. If the CEL expression in Value returns a string\nthis is required to identify what key to write to. If the CEL expression in Value returns a map[string]string\nKey must not be set, instead the keys written will be determined dynamically based on the keys of the resulting\nmap[string]string.",
+                "type": "string"
+              },
+              "labels": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Labels is an optional set of labels to apply to the destination resource.",
+                "type": "object"
+              },
+              "name": {
+                "description": "Name is the name of the Kubernetes configmap or secret to write to.\nThe configmap or secret will be created in the same namespace as the resource.",
+                "type": "string"
+              },
+              "value": {
+                "description": "Value is a CEL expression. The CEL expression may return a string or a map[string]string. For more information\non CEL in ASO see https://azure.github.io/azure-service-operator/guide/expressions/",
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "value"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "secretExpressions": {
+          "description": "SecretExpressions: configures where to place operator written dynamic secrets (created with CEL expressions).",
+          "items": {
+            "description": "DestinationExpression is a CEL expression and a destination to store the result in. The destination may\nbe a secret or a configmap. The value of the expression is stored at the specified location in\nthe destination.",
+            "properties": {
+              "annotations": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Annotations is an optional set of annotations to apply to the destination resource.",
+                "type": "object"
+              },
+              "key": {
+                "description": "Key is the key in the ConfigMap or Secret being written to. If the CEL expression in Value returns a string\nthis is required to identify what key to write to. If the CEL expression in Value returns a map[string]string\nKey must not be set, instead the keys written will be determined dynamically based on the keys of the resulting\nmap[string]string.",
+                "type": "string"
+              },
+              "labels": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Labels is an optional set of labels to apply to the destination resource.",
+                "type": "object"
+              },
+              "name": {
+                "description": "Name is the name of the Kubernetes configmap or secret to write to.\nThe configmap or secret will be created in the same namespace as the resource.",
+                "type": "string"
+              },
+              "value": {
+                "description": "Value is a CEL expression. The CEL expression may return a string or a map[string]string. For more information\non CEL in ASO see https://azure.github.io/azure-service-operator/guide/expressions/",
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "value"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "owner": {
+      "description": "Owner: The owner of the resource. The owner controls where the resource goes when it is deployed. The owner also\ncontrols the resources lifecycle. When the owner is deleted the resource will also be deleted. Owner is expected to be a\nreference to a resources.azure.com/ResourceGroup resource",
+      "properties": {
+        "armId": {
+          "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+          "type": "string"
+        },
+        "name": {
+          "description": "This is the name of the Kubernetes resource to reference.",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "rules": {
+      "description": "Rules: Defines the rules in the Prometheus rule group.",
+      "items": {
+        "description": "An Azure Prometheus alerting or recording rule.",
+        "properties": {
+          "actions": {
+            "description": "Actions: Actions that are performed when the alert rule becomes active, and when an alert condition is resolved.",
+            "items": {
+              "description": "An alert action. Only relevant for alerts.",
+              "properties": {
+                "actionGroupReference": {
+                  "description": "ActionGroupReference: The resource id of the action group to use.",
+                  "properties": {
+                    "armId": {
+                      "description": "ARMID is a string of the form /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}.\nThe /resourcegroups/{resourceGroupName} bit is optional as some resources are scoped at the subscription level\nARMID is mutually exclusive with Group, Kind, Namespace and Name.",
+                      "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+                      "type": "string"
+                    },
+                    "group": {
+                      "description": "Group is the Kubernetes group of the resource.",
+                      "type": "string"
+                    },
+                    "kind": {
+                      "description": "Kind is the Kubernetes kind of the resource.",
+                      "type": "string"
+                    },
+                    "name": {
+                      "description": "Name is the Kubernetes name of the resource.",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                },
+                "actionProperties": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "description": "ActionProperties: The properties of an action group object.",
+                  "type": "object"
+                }
+              },
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "alert": {
+            "description": "Alert: Alert rule name.",
+            "type": "string"
+          },
+          "annotations": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Annotations: The annotations clause specifies a set of informational labels that can be used to store longer additional\ninformation such as alert descriptions or runbook links. The annotation values can be templated.",
+            "type": "object"
+          },
+          "enabled": {
+            "description": "Enabled: Enable/disable rule.",
+            "type": "boolean"
+          },
+          "expression": {
+            "description": "Expression: The PromQL expression to evaluate. https://prometheus.io/docs/prometheus/latest/querying/basics/. Evaluated\nperiodically as given by 'interval', and the result recorded as a new set of time series with the metric name as given\nby 'record'.",
+            "type": "string"
+          },
+          "for": {
+            "description": "For: The amount of time alert must be active before firing.",
+            "type": "string"
+          },
+          "labels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Labels: Labels to add or overwrite before storing the result.",
+            "type": "object"
+          },
+          "record": {
+            "description": "Record: Recorded metrics name.",
+            "type": "string"
+          },
+          "resolveConfiguration": {
+            "description": "ResolveConfiguration: Defines the configuration for resolving fired alerts. Only relevant for alerts.",
+            "properties": {
+              "autoResolved": {
+                "description": "AutoResolved: Enable alert auto-resolution.",
+                "type": "boolean"
+              },
+              "timeToResolve": {
+                "description": "TimeToResolve: Alert auto-resolution timeout.",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "severity": {
+            "description": "Severity: The severity of the alerts fired by the rule. Must be between 0 and 4.",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "expression"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "scopesReferences": {
+      "description": "ScopesReferences: Target Azure Monitor workspaces resource ids. This api-version is currently limited to creating with\none scope. This may change in future.",
+      "items": {
+        "description": "ResourceReference represents a resource reference, either to a Kubernetes resource or directly to an Azure resource via ARMID",
+        "properties": {
+          "armId": {
+            "description": "ARMID is a string of the form /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}.\nThe /resourcegroups/{resourceGroupName} bit is optional as some resources are scoped at the subscription level\nARMID is mutually exclusive with Group, Kind, Namespace and Name.",
+            "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+            "type": "string"
+          },
+          "group": {
+            "description": "Group is the Kubernetes group of the resource.",
+            "type": "string"
+          },
+          "kind": {
+            "description": "Kind is the Kubernetes kind of the resource.",
+            "type": "string"
+          },
+          "name": {
+            "description": "Name is the Kubernetes name of the resource.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "tags": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Tags: Resource tags.",
+      "type": "object"
+    }
+  },
+  "required": [
+    "location",
+    "owner",
+    "rules",
+    "scopesReferences"
+  ],
+  "title": "Azure Alertsmanagement PrometheusRuleGroup",
+  "type": "object"
+}

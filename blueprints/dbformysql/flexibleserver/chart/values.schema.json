@@ -1,0 +1,654 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "description": "Provision an Azure Dbformysql FlexibleServer via Azure Service Operator. Fields mirror the dbformysql.azure.com/v1api20231230 FlexibleServer spec.",
+  "properties": {
+    "administratorLogin": {
+      "description": "AdministratorLogin: The administrator's login name of a server. Can only be specified when the server is being created\n(and is required for creation).",
+      "type": "string"
+    },
+    "administratorLoginPassword": {
+      "description": "AdministratorLoginPassword: The password of the administrator login (required for server creation).",
+      "properties": {
+        "key": {
+          "description": "Key is the key in the Kubernetes secret being referenced",
+          "type": "string"
+        },
+        "name": {
+          "description": "Name is the name of the Kubernetes secret being referenced.\nThe secret must be in the same namespace as the resource",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key",
+        "name"
+      ],
+      "type": "object"
+    },
+    "availabilityZone": {
+      "description": "AvailabilityZone: availability Zone information of the server.",
+      "type": "string"
+    },
+    "azureName": {
+      "description": "AzureName: The name of the resource in Azure. This is often the same as the name of the resource in Kubernetes but it\ndoesn't have to be.",
+      "type": "string"
+    },
+    "backup": {
+      "description": "Backup: Backup related properties of a server.",
+      "properties": {
+        "backupIntervalHours": {
+          "description": "BackupIntervalHours: Backup interval hours for the server.",
+          "type": "integer"
+        },
+        "backupRetentionDays": {
+          "description": "BackupRetentionDays: Backup retention days for the server.",
+          "type": "integer"
+        },
+        "geoRedundantBackup": {
+          "description": "GeoRedundantBackup: Whether or not geo redundant backup is enabled.",
+          "enum": [
+            "Disabled",
+            "Enabled"
+          ],
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "createMode": {
+      "description": "CreateMode: The mode to create a new MySQL server.",
+      "enum": [
+        "Default",
+        "GeoRestore",
+        "PointInTimeRestore",
+        "Replica"
+      ],
+      "type": "string"
+    },
+    "credentialFrom": {
+      "default": "",
+      "description": "Name of a Kubernetes Secret holding the Azure credential to use for this resource. Rendered as the serviceoperator.azure.com/credential-from annotation. Leave empty to inherit the credential from the namespace, then from the operator's global credential. The resource's subscription and resource group come from spec.owner, not from this field.",
+      "title": "Azure credential Secret",
+      "type": "string"
+    },
+    "dataEncryption": {
+      "description": "DataEncryption: The Data Encryption for CMK.",
+      "properties": {
+        "geoBackupKeyURI": {
+          "description": "GeoBackupKeyURI: Geo backup key uri as key vault can't cross region, need cmk in same region as geo backup",
+          "type": "string"
+        },
+        "geoBackupUserAssignedIdentityReference": {
+          "description": "GeoBackupUserAssignedIdentityReference: Geo backup user identity resource id as identity can't cross region, need\nidentity in same region as geo backup",
+          "properties": {
+            "armId": {
+              "description": "ARMID is a string of the form /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}.\nThe /resourcegroups/{resourceGroupName} bit is optional as some resources are scoped at the subscription level\nARMID is mutually exclusive with Group, Kind, Namespace and Name.",
+              "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+              "type": "string"
+            },
+            "group": {
+              "description": "Group is the Kubernetes group of the resource.",
+              "type": "string"
+            },
+            "kind": {
+              "description": "Kind is the Kubernetes kind of the resource.",
+              "type": "string"
+            },
+            "name": {
+              "description": "Name is the Kubernetes name of the resource.",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "primaryKeyURI": {
+          "description": "PrimaryKeyURI: Primary key uri",
+          "type": "string"
+        },
+        "primaryUserAssignedIdentityReference": {
+          "description": "PrimaryUserAssignedIdentityReference: Primary user identity resource id",
+          "properties": {
+            "armId": {
+              "description": "ARMID is a string of the form /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}.\nThe /resourcegroups/{resourceGroupName} bit is optional as some resources are scoped at the subscription level\nARMID is mutually exclusive with Group, Kind, Namespace and Name.",
+              "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+              "type": "string"
+            },
+            "group": {
+              "description": "Group is the Kubernetes group of the resource.",
+              "type": "string"
+            },
+            "kind": {
+              "description": "Kind is the Kubernetes kind of the resource.",
+              "type": "string"
+            },
+            "name": {
+              "description": "Name is the Kubernetes name of the resource.",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "type": {
+          "description": "Type: The key type, AzureKeyVault for enable cmk, SystemManaged for disable cmk.",
+          "enum": [
+            "AzureKeyVault",
+            "SystemManaged"
+          ],
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "highAvailability": {
+      "description": "HighAvailability: High availability related properties of a server.",
+      "properties": {
+        "mode": {
+          "description": "Mode: High availability mode for a server.",
+          "enum": [
+            "Disabled",
+            "SameZone",
+            "ZoneRedundant"
+          ],
+          "type": "string"
+        },
+        "standbyAvailabilityZone": {
+          "description": "StandbyAvailabilityZone: Availability zone of the standby server.",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "identity": {
+      "description": "Identity: The cmk identity for the server.",
+      "properties": {
+        "type": {
+          "description": "Type: Type of managed service identity.",
+          "enum": [
+            "UserAssigned"
+          ],
+          "type": "string"
+        },
+        "userAssignedIdentities": {
+          "description": "UserAssignedIdentities: Metadata of user assigned identity.",
+          "items": {
+            "description": "Information about the user assigned identity for the resource",
+            "properties": {
+              "reference": {
+                "description": "ResourceReference represents a resource reference, either to a Kubernetes resource or directly to an Azure resource via ARMID",
+                "properties": {
+                  "armId": {
+                    "description": "ARMID is a string of the form /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}.\nThe /resourcegroups/{resourceGroupName} bit is optional as some resources are scoped at the subscription level\nARMID is mutually exclusive with Group, Kind, Namespace and Name.",
+                    "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+                    "type": "string"
+                  },
+                  "group": {
+                    "description": "Group is the Kubernetes group of the resource.",
+                    "type": "string"
+                  },
+                  "kind": {
+                    "description": "Kind is the Kubernetes kind of the resource.",
+                    "type": "string"
+                  },
+                  "name": {
+                    "description": "Name is the Kubernetes name of the resource.",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "importSourceProperties": {
+      "description": "ImportSourceProperties: Source properties for import from storage.",
+      "properties": {
+        "dataDirPath": {
+          "description": "DataDirPath: Relative path of data directory in storage.",
+          "type": "string"
+        },
+        "sasToken": {
+          "description": "SasToken: Sas token for accessing source storage. Read and list permissions are required for sas token.",
+          "properties": {
+            "key": {
+              "description": "Key is the key in the Kubernetes secret being referenced",
+              "type": "string"
+            },
+            "name": {
+              "description": "Name is the name of the Kubernetes secret being referenced.\nThe secret must be in the same namespace as the resource",
+              "type": "string"
+            }
+          },
+          "required": [
+            "key",
+            "name"
+          ],
+          "type": "object"
+        },
+        "storageType": {
+          "description": "StorageType: Storage type of import source.",
+          "enum": [
+            "AzureBlob"
+          ],
+          "type": "string"
+        },
+        "storageUrl": {
+          "description": "StorageUrl: Uri of the import source storage.",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "location": {
+      "description": "Location: The geo-location where the resource lives",
+      "type": "string"
+    },
+    "maintenanceWindow": {
+      "description": "MaintenanceWindow: Maintenance window of a server.",
+      "properties": {
+        "customWindow": {
+          "description": "CustomWindow: indicates whether custom window is enabled or disabled",
+          "type": "string"
+        },
+        "dayOfWeek": {
+          "description": "DayOfWeek: day of week for maintenance window",
+          "type": "integer"
+        },
+        "startHour": {
+          "description": "StartHour: start hour for maintenance window",
+          "type": "integer"
+        },
+        "startMinute": {
+          "description": "StartMinute: start minute for maintenance window",
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "network": {
+      "description": "Network: Network related properties of a server.",
+      "properties": {
+        "delegatedSubnetResourceReference": {
+          "description": "DelegatedSubnetResourceReference: Delegated subnet resource id used to setup vnet for a server.",
+          "properties": {
+            "armId": {
+              "description": "ARMID is a string of the form /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}.\nThe /resourcegroups/{resourceGroupName} bit is optional as some resources are scoped at the subscription level\nARMID is mutually exclusive with Group, Kind, Namespace and Name.",
+              "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+              "type": "string"
+            },
+            "group": {
+              "description": "Group is the Kubernetes group of the resource.",
+              "type": "string"
+            },
+            "kind": {
+              "description": "Kind is the Kubernetes kind of the resource.",
+              "type": "string"
+            },
+            "name": {
+              "description": "Name is the Kubernetes name of the resource.",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "privateDnsZoneResourceReference": {
+          "description": "PrivateDnsZoneResourceReference: Private DNS zone resource id.",
+          "properties": {
+            "armId": {
+              "description": "ARMID is a string of the form /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}.\nThe /resourcegroups/{resourceGroupName} bit is optional as some resources are scoped at the subscription level\nARMID is mutually exclusive with Group, Kind, Namespace and Name.",
+              "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+              "type": "string"
+            },
+            "group": {
+              "description": "Group is the Kubernetes group of the resource.",
+              "type": "string"
+            },
+            "kind": {
+              "description": "Kind is the Kubernetes kind of the resource.",
+              "type": "string"
+            },
+            "name": {
+              "description": "Name is the Kubernetes name of the resource.",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "publicNetworkAccess": {
+          "description": "PublicNetworkAccess: Whether or not public network access is allowed for this server. Value is 'Disabled' when server\nhas VNet integration.",
+          "enum": [
+            "Disabled",
+            "Enabled"
+          ],
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "operatorSpec": {
+      "description": "OperatorSpec: The specification for configuring operator behavior. This field is interpreted by the operator and not\npassed directly to Azure",
+      "properties": {
+        "configMapExpressions": {
+          "description": "ConfigMapExpressions: configures where to place operator written dynamic ConfigMaps (created with CEL expressions).",
+          "items": {
+            "description": "DestinationExpression is a CEL expression and a destination to store the result in. The destination may\nbe a secret or a configmap. The value of the expression is stored at the specified location in\nthe destination.",
+            "properties": {
+              "annotations": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Annotations is an optional set of annotations to apply to the destination resource.",
+                "type": "object"
+              },
+              "key": {
+                "description": "Key is the key in the ConfigMap or Secret being written to. If the CEL expression in Value returns a string\nthis is required to identify what key to write to. If the CEL expression in Value returns a map[string]string\nKey must not be set, instead the keys written will be determined dynamically based on the keys of the resulting\nmap[string]string.",
+                "type": "string"
+              },
+              "labels": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Labels is an optional set of labels to apply to the destination resource.",
+                "type": "object"
+              },
+              "name": {
+                "description": "Name is the name of the Kubernetes configmap or secret to write to.\nThe configmap or secret will be created in the same namespace as the resource.",
+                "type": "string"
+              },
+              "value": {
+                "description": "Value is a CEL expression. The CEL expression may return a string or a map[string]string. For more information\non CEL in ASO see https://azure.github.io/azure-service-operator/guide/expressions/",
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "value"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "configMaps": {
+          "description": "ConfigMaps: configures where to place operator written ConfigMaps.",
+          "properties": {
+            "administratorLogin": {
+              "description": "AdministratorLogin: indicates where the AdministratorLogin config map should be placed. If omitted, no config map will\nbe created.",
+              "properties": {
+                "annotations": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "description": "Annotations is an optional set of annotations to apply to the ConfigMap.",
+                  "type": "object"
+                },
+                "key": {
+                  "description": "Key is the key in the ConfigMap being referenced",
+                  "type": "string"
+                },
+                "labels": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "description": "Labels is an optional set of labels to apply to the ConfigMap.",
+                  "type": "object"
+                },
+                "name": {
+                  "description": "Name is the name of the Kubernetes ConfigMap to write to.\nThe ConfigMap will be created in the same namespace as the resource.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "key",
+                "name"
+              ],
+              "type": "object"
+            },
+            "fullyQualifiedDomainName": {
+              "description": "FullyQualifiedDomainName: indicates where the FullyQualifiedDomainName config map should be placed. If omitted, no\nconfig map will be created.",
+              "properties": {
+                "annotations": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "description": "Annotations is an optional set of annotations to apply to the ConfigMap.",
+                  "type": "object"
+                },
+                "key": {
+                  "description": "Key is the key in the ConfigMap being referenced",
+                  "type": "string"
+                },
+                "labels": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "description": "Labels is an optional set of labels to apply to the ConfigMap.",
+                  "type": "object"
+                },
+                "name": {
+                  "description": "Name is the name of the Kubernetes ConfigMap to write to.\nThe ConfigMap will be created in the same namespace as the resource.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "key",
+                "name"
+              ],
+              "type": "object"
+            }
+          },
+          "type": "object"
+        },
+        "secretExpressions": {
+          "description": "SecretExpressions: configures where to place operator written dynamic secrets (created with CEL expressions).",
+          "items": {
+            "description": "DestinationExpression is a CEL expression and a destination to store the result in. The destination may\nbe a secret or a configmap. The value of the expression is stored at the specified location in\nthe destination.",
+            "properties": {
+              "annotations": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Annotations is an optional set of annotations to apply to the destination resource.",
+                "type": "object"
+              },
+              "key": {
+                "description": "Key is the key in the ConfigMap or Secret being written to. If the CEL expression in Value returns a string\nthis is required to identify what key to write to. If the CEL expression in Value returns a map[string]string\nKey must not be set, instead the keys written will be determined dynamically based on the keys of the resulting\nmap[string]string.",
+                "type": "string"
+              },
+              "labels": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Labels is an optional set of labels to apply to the destination resource.",
+                "type": "object"
+              },
+              "name": {
+                "description": "Name is the name of the Kubernetes configmap or secret to write to.\nThe configmap or secret will be created in the same namespace as the resource.",
+                "type": "string"
+              },
+              "value": {
+                "description": "Value is a CEL expression. The CEL expression may return a string or a map[string]string. For more information\non CEL in ASO see https://azure.github.io/azure-service-operator/guide/expressions/",
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "value"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "secrets": {
+          "description": "Secrets: configures where to place Azure generated secrets.",
+          "properties": {
+            "fullyQualifiedDomainName": {
+              "description": "FullyQualifiedDomainName: indicates where the FullyQualifiedDomainName secret should be placed. If omitted, the secret\nwill not be retrieved from Azure.",
+              "properties": {
+                "annotations": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "description": "Annotations is an optional set of annotations to apply to the secret.",
+                  "type": "object"
+                },
+                "key": {
+                  "description": "Key is the key in the Kubernetes secret being referenced.",
+                  "type": "string"
+                },
+                "labels": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "description": "Labels is an optional set of labels to apply to the secret.",
+                  "type": "object"
+                },
+                "name": {
+                  "description": "Name is the name of the Kubernetes secret to write to.\nThe secret will be created in the same namespace as the resource.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "key",
+                "name"
+              ],
+              "type": "object"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "owner": {
+      "description": "Owner: The owner of the resource. The owner controls where the resource goes when it is deployed. The owner also\ncontrols the resources lifecycle. When the owner is deleted the resource will also be deleted. Owner is expected to be a\nreference to a resources.azure.com/ResourceGroup resource",
+      "properties": {
+        "armId": {
+          "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+          "type": "string"
+        },
+        "name": {
+          "description": "This is the name of the Kubernetes resource to reference.",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "replicationRole": {
+      "description": "ReplicationRole: The replication role.",
+      "enum": [
+        "None",
+        "Replica",
+        "Source"
+      ],
+      "type": "string"
+    },
+    "restorePointInTime": {
+      "description": "RestorePointInTime: Restore point creation time (ISO8601 format), specifying the time to restore from.",
+      "type": "string"
+    },
+    "sku": {
+      "description": "Sku: The SKU (pricing tier) of the server.",
+      "properties": {
+        "name": {
+          "description": "Name: The name of the sku, e.g. Standard_D32s_v3.",
+          "type": "string"
+        },
+        "tier": {
+          "description": "Tier: The tier of the particular SKU, e.g. GeneralPurpose.",
+          "enum": [
+            "Burstable",
+            "GeneralPurpose",
+            "MemoryOptimized"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "tier"
+      ],
+      "type": "object"
+    },
+    "sourceServerResourceReference": {
+      "description": "SourceServerResourceReference: The source MySQL server id.",
+      "properties": {
+        "armId": {
+          "description": "ARMID is a string of the form /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}.\nThe /resourcegroups/{resourceGroupName} bit is optional as some resources are scoped at the subscription level\nARMID is mutually exclusive with Group, Kind, Namespace and Name.",
+          "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+          "type": "string"
+        },
+        "group": {
+          "description": "Group is the Kubernetes group of the resource.",
+          "type": "string"
+        },
+        "kind": {
+          "description": "Kind is the Kubernetes kind of the resource.",
+          "type": "string"
+        },
+        "name": {
+          "description": "Name is the Kubernetes name of the resource.",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "storage": {
+      "description": "Storage: Storage related properties of a server.",
+      "properties": {
+        "autoGrow": {
+          "description": "AutoGrow: Enable Storage Auto Grow or not.",
+          "enum": [
+            "Disabled",
+            "Enabled"
+          ],
+          "type": "string"
+        },
+        "autoIoScaling": {
+          "description": "AutoIoScaling: Enable IO Auto Scaling or not.",
+          "enum": [
+            "Disabled",
+            "Enabled"
+          ],
+          "type": "string"
+        },
+        "iops": {
+          "description": "Iops: Storage IOPS for a server.",
+          "type": "integer"
+        },
+        "logOnDisk": {
+          "description": "LogOnDisk: Enable Log On Disk or not.",
+          "enum": [
+            "Disabled",
+            "Enabled"
+          ],
+          "type": "string"
+        },
+        "storageSizeGB": {
+          "description": "StorageSizeGB: Max storage size allowed for a server.",
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "tags": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Tags: Resource tags.",
+      "type": "object"
+    },
+    "version": {
+      "description": "Version: Server version.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "location",
+    "owner"
+  ],
+  "title": "Azure Dbformysql FlexibleServer",
+  "type": "object"
+}

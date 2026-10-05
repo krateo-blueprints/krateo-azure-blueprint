@@ -1,0 +1,894 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "description": "Provision an Azure Eventgrid EventSubscription via Azure Service Operator. Fields mirror the eventgrid.azure.com/v1api20200601 EventSubscription spec.",
+  "properties": {
+    "azureName": {
+      "description": "AzureName: The name of the resource in Azure. This is often the same as the name of the resource in Kubernetes but it\ndoesn't have to be.",
+      "type": "string"
+    },
+    "credentialFrom": {
+      "default": "",
+      "description": "Name of a Kubernetes Secret holding the Azure credential to use for this resource. Rendered as the serviceoperator.azure.com/credential-from annotation. Leave empty to inherit the credential from the namespace, then from the operator's global credential. The resource's subscription and resource group come from spec.owner, not from this field.",
+      "title": "Azure credential Secret",
+      "type": "string"
+    },
+    "deadLetterDestination": {
+      "description": "DeadLetterDestination: The DeadLetter destination of the event subscription.",
+      "properties": {
+        "storageBlob": {
+          "description": "StorageBlob: Mutually exclusive with all other properties",
+          "properties": {
+            "blobContainerName": {
+              "description": "BlobContainerName: The name of the Storage blob container that is the destination of the deadletter events",
+              "type": "string"
+            },
+            "endpointType": {
+              "description": "EndpointType: Type of the endpoint for the dead letter destination",
+              "enum": [
+                "StorageBlob"
+              ],
+              "type": "string"
+            },
+            "resourceReference": {
+              "description": "ResourceReference: The Azure Resource ID of the storage account that is the destination of the deadletter events",
+              "properties": {
+                "armId": {
+                  "description": "ARMID is a string of the form /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}.\nThe /resourcegroups/{resourceGroupName} bit is optional as some resources are scoped at the subscription level\nARMID is mutually exclusive with Group, Kind, Namespace and Name.",
+                  "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+                  "type": "string"
+                },
+                "group": {
+                  "description": "Group is the Kubernetes group of the resource.",
+                  "type": "string"
+                },
+                "kind": {
+                  "description": "Kind is the Kubernetes kind of the resource.",
+                  "type": "string"
+                },
+                "name": {
+                  "description": "Name is the Kubernetes name of the resource.",
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "required": [
+            "endpointType"
+          ],
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "destination": {
+      "description": "Destination: Information about the destination where events have to be delivered for the event subscription.",
+      "properties": {
+        "azureFunction": {
+          "description": "AzureFunction: Mutually exclusive with all other properties",
+          "properties": {
+            "endpointType": {
+              "description": "EndpointType: Type of the endpoint for the event subscription destination.",
+              "enum": [
+                "AzureFunction"
+              ],
+              "type": "string"
+            },
+            "maxEventsPerBatch": {
+              "description": "MaxEventsPerBatch: Maximum number of events per batch.",
+              "type": "integer"
+            },
+            "preferredBatchSizeInKilobytes": {
+              "description": "PreferredBatchSizeInKilobytes: Preferred batch size in Kilobytes.",
+              "type": "integer"
+            },
+            "resourceReference": {
+              "description": "ResourceReference: The Azure Resource Id that represents the endpoint of the Azure Function destination of an event\nsubscription.",
+              "properties": {
+                "armId": {
+                  "description": "ARMID is a string of the form /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}.\nThe /resourcegroups/{resourceGroupName} bit is optional as some resources are scoped at the subscription level\nARMID is mutually exclusive with Group, Kind, Namespace and Name.",
+                  "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+                  "type": "string"
+                },
+                "group": {
+                  "description": "Group is the Kubernetes group of the resource.",
+                  "type": "string"
+                },
+                "kind": {
+                  "description": "Kind is the Kubernetes kind of the resource.",
+                  "type": "string"
+                },
+                "name": {
+                  "description": "Name is the Kubernetes name of the resource.",
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "required": [
+            "endpointType"
+          ],
+          "type": "object"
+        },
+        "eventHub": {
+          "description": "EventHub: Mutually exclusive with all other properties",
+          "properties": {
+            "endpointType": {
+              "description": "EndpointType: Type of the endpoint for the event subscription destination.",
+              "enum": [
+                "EventHub"
+              ],
+              "type": "string"
+            },
+            "resourceReference": {
+              "description": "ResourceReference: The Azure Resource Id that represents the endpoint of an Event Hub destination of an event\nsubscription.",
+              "properties": {
+                "armId": {
+                  "description": "ARMID is a string of the form /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}.\nThe /resourcegroups/{resourceGroupName} bit is optional as some resources are scoped at the subscription level\nARMID is mutually exclusive with Group, Kind, Namespace and Name.",
+                  "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+                  "type": "string"
+                },
+                "group": {
+                  "description": "Group is the Kubernetes group of the resource.",
+                  "type": "string"
+                },
+                "kind": {
+                  "description": "Kind is the Kubernetes kind of the resource.",
+                  "type": "string"
+                },
+                "name": {
+                  "description": "Name is the Kubernetes name of the resource.",
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "required": [
+            "endpointType"
+          ],
+          "type": "object"
+        },
+        "hybridConnection": {
+          "description": "HybridConnection: Mutually exclusive with all other properties",
+          "properties": {
+            "endpointType": {
+              "description": "EndpointType: Type of the endpoint for the event subscription destination.",
+              "enum": [
+                "HybridConnection"
+              ],
+              "type": "string"
+            },
+            "resourceReference": {
+              "description": "ResourceReference: The Azure Resource ID of an hybrid connection that is the destination of an event subscription.",
+              "properties": {
+                "armId": {
+                  "description": "ARMID is a string of the form /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}.\nThe /resourcegroups/{resourceGroupName} bit is optional as some resources are scoped at the subscription level\nARMID is mutually exclusive with Group, Kind, Namespace and Name.",
+                  "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+                  "type": "string"
+                },
+                "group": {
+                  "description": "Group is the Kubernetes group of the resource.",
+                  "type": "string"
+                },
+                "kind": {
+                  "description": "Kind is the Kubernetes kind of the resource.",
+                  "type": "string"
+                },
+                "name": {
+                  "description": "Name is the Kubernetes name of the resource.",
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "required": [
+            "endpointType"
+          ],
+          "type": "object"
+        },
+        "serviceBusQueue": {
+          "description": "ServiceBusQueue: Mutually exclusive with all other properties",
+          "properties": {
+            "endpointType": {
+              "description": "EndpointType: Type of the endpoint for the event subscription destination.",
+              "enum": [
+                "ServiceBusQueue"
+              ],
+              "type": "string"
+            },
+            "resourceReference": {
+              "description": "ResourceReference: The Azure Resource Id that represents the endpoint of the Service Bus destination of an event\nsubscription.",
+              "properties": {
+                "armId": {
+                  "description": "ARMID is a string of the form /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}.\nThe /resourcegroups/{resourceGroupName} bit is optional as some resources are scoped at the subscription level\nARMID is mutually exclusive with Group, Kind, Namespace and Name.",
+                  "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+                  "type": "string"
+                },
+                "group": {
+                  "description": "Group is the Kubernetes group of the resource.",
+                  "type": "string"
+                },
+                "kind": {
+                  "description": "Kind is the Kubernetes kind of the resource.",
+                  "type": "string"
+                },
+                "name": {
+                  "description": "Name is the Kubernetes name of the resource.",
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "required": [
+            "endpointType"
+          ],
+          "type": "object"
+        },
+        "serviceBusTopic": {
+          "description": "ServiceBusTopic: Mutually exclusive with all other properties",
+          "properties": {
+            "endpointType": {
+              "description": "EndpointType: Type of the endpoint for the event subscription destination.",
+              "enum": [
+                "ServiceBusTopic"
+              ],
+              "type": "string"
+            },
+            "resourceReference": {
+              "description": "ResourceReference: The Azure Resource Id that represents the endpoint of the Service Bus Topic destination of an event\nsubscription.",
+              "properties": {
+                "armId": {
+                  "description": "ARMID is a string of the form /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}.\nThe /resourcegroups/{resourceGroupName} bit is optional as some resources are scoped at the subscription level\nARMID is mutually exclusive with Group, Kind, Namespace and Name.",
+                  "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+                  "type": "string"
+                },
+                "group": {
+                  "description": "Group is the Kubernetes group of the resource.",
+                  "type": "string"
+                },
+                "kind": {
+                  "description": "Kind is the Kubernetes kind of the resource.",
+                  "type": "string"
+                },
+                "name": {
+                  "description": "Name is the Kubernetes name of the resource.",
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "required": [
+            "endpointType"
+          ],
+          "type": "object"
+        },
+        "storageQueue": {
+          "description": "StorageQueue: Mutually exclusive with all other properties",
+          "properties": {
+            "endpointType": {
+              "description": "EndpointType: Type of the endpoint for the event subscription destination.",
+              "enum": [
+                "StorageQueue"
+              ],
+              "type": "string"
+            },
+            "queueName": {
+              "description": "QueueName: The name of the Storage queue under a storage account that is the destination of an event subscription.",
+              "type": "string"
+            },
+            "queueNameFromConfig": {
+              "description": "QueueNameFromConfig: The name of the Storage queue under a storage account that is the destination of an event\nsubscription.",
+              "properties": {
+                "key": {
+                  "description": "Key is the key in the Kubernetes configmap being referenced",
+                  "type": "string"
+                },
+                "name": {
+                  "description": "Name is the name of the Kubernetes configmap being referenced.\nThe configmap must be in the same namespace as the resource",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "key",
+                "name"
+              ],
+              "type": "object"
+            },
+            "resourceReference": {
+              "description": "ResourceReference: The Azure Resource ID of the storage account that contains the queue that is the destination of an\nevent subscription.",
+              "properties": {
+                "armId": {
+                  "description": "ARMID is a string of the form /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}.\nThe /resourcegroups/{resourceGroupName} bit is optional as some resources are scoped at the subscription level\nARMID is mutually exclusive with Group, Kind, Namespace and Name.",
+                  "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+                  "type": "string"
+                },
+                "group": {
+                  "description": "Group is the Kubernetes group of the resource.",
+                  "type": "string"
+                },
+                "kind": {
+                  "description": "Kind is the Kubernetes kind of the resource.",
+                  "type": "string"
+                },
+                "name": {
+                  "description": "Name is the Kubernetes name of the resource.",
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "required": [
+            "endpointType"
+          ],
+          "type": "object"
+        },
+        "webHook": {
+          "description": "WebHook: Mutually exclusive with all other properties",
+          "properties": {
+            "azureActiveDirectoryApplicationIdOrUri": {
+              "description": "AzureActiveDirectoryApplicationIdOrUri: The Azure Active Directory Application ID or URI to get the access token that\nwill be included as the bearer token in delivery requests.",
+              "type": "string"
+            },
+            "azureActiveDirectoryApplicationIdOrUriFromConfig": {
+              "description": "AzureActiveDirectoryApplicationIdOrUriFromConfig: The Azure Active Directory Application ID or URI to get the access\ntoken that will be included as the bearer token in delivery requests.",
+              "properties": {
+                "key": {
+                  "description": "Key is the key in the Kubernetes configmap being referenced",
+                  "type": "string"
+                },
+                "name": {
+                  "description": "Name is the name of the Kubernetes configmap being referenced.\nThe configmap must be in the same namespace as the resource",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "key",
+                "name"
+              ],
+              "type": "object"
+            },
+            "azureActiveDirectoryTenantId": {
+              "description": "AzureActiveDirectoryTenantId: The Azure Active Directory Tenant ID to get the access token that will be included as the\nbearer token in delivery requests.",
+              "type": "string"
+            },
+            "endpointType": {
+              "description": "EndpointType: Type of the endpoint for the event subscription destination.",
+              "enum": [
+                "WebHook"
+              ],
+              "type": "string"
+            },
+            "endpointUrl": {
+              "description": "EndpointUrl: The URL that represents the endpoint of the destination of an event subscription.",
+              "properties": {
+                "key": {
+                  "description": "Key is the key in the Kubernetes secret being referenced",
+                  "type": "string"
+                },
+                "name": {
+                  "description": "Name is the name of the Kubernetes secret being referenced.\nThe secret must be in the same namespace as the resource",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "key",
+                "name"
+              ],
+              "type": "object"
+            },
+            "maxEventsPerBatch": {
+              "description": "MaxEventsPerBatch: Maximum number of events per batch.",
+              "type": "integer"
+            },
+            "preferredBatchSizeInKilobytes": {
+              "description": "PreferredBatchSizeInKilobytes: Preferred batch size in Kilobytes.",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "endpointType"
+          ],
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "eventDeliverySchema": {
+      "description": "EventDeliverySchema: The event delivery schema for the event subscription.",
+      "enum": [
+        "CloudEventSchemaV1_0",
+        "CustomInputSchema",
+        "EventGridSchema"
+      ],
+      "type": "string"
+    },
+    "expirationTimeUtc": {
+      "description": "ExpirationTimeUtc: Expiration time of the event subscription.",
+      "type": "string"
+    },
+    "filter": {
+      "description": "Filter: Information about the filter for the event subscription.",
+      "properties": {
+        "advancedFilters": {
+          "description": "AdvancedFilters: An array of advanced filters that are used for filtering event subscriptions.",
+          "items": {
+            "properties": {
+              "boolEquals": {
+                "description": "BoolEquals: Mutually exclusive with all other properties",
+                "properties": {
+                  "key": {
+                    "description": "Key: The field/property in the event based on which you want to filter.",
+                    "type": "string"
+                  },
+                  "operatorType": {
+                    "description": "OperatorType: The operator type used for filtering, e.g., NumberIn, StringContains, BoolEquals and others.",
+                    "enum": [
+                      "BoolEquals"
+                    ],
+                    "type": "string"
+                  },
+                  "value": {
+                    "description": "Value: The boolean filter value.",
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "operatorType"
+                ],
+                "type": "object"
+              },
+              "numberGreaterThan": {
+                "description": "NumberGreaterThan: Mutually exclusive with all other properties",
+                "properties": {
+                  "key": {
+                    "description": "Key: The field/property in the event based on which you want to filter.",
+                    "type": "string"
+                  },
+                  "operatorType": {
+                    "description": "OperatorType: The operator type used for filtering, e.g., NumberIn, StringContains, BoolEquals and others.",
+                    "enum": [
+                      "NumberGreaterThan"
+                    ],
+                    "type": "string"
+                  },
+                  "value": {
+                    "description": "Value: The filter value.",
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "operatorType"
+                ],
+                "type": "object"
+              },
+              "numberGreaterThanOrEquals": {
+                "description": "NumberGreaterThanOrEquals: Mutually exclusive with all other properties",
+                "properties": {
+                  "key": {
+                    "description": "Key: The field/property in the event based on which you want to filter.",
+                    "type": "string"
+                  },
+                  "operatorType": {
+                    "description": "OperatorType: The operator type used for filtering, e.g., NumberIn, StringContains, BoolEquals and others.",
+                    "enum": [
+                      "NumberGreaterThanOrEquals"
+                    ],
+                    "type": "string"
+                  },
+                  "value": {
+                    "description": "Value: The filter value.",
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "operatorType"
+                ],
+                "type": "object"
+              },
+              "numberIn": {
+                "description": "NumberIn: Mutually exclusive with all other properties",
+                "properties": {
+                  "key": {
+                    "description": "Key: The field/property in the event based on which you want to filter.",
+                    "type": "string"
+                  },
+                  "operatorType": {
+                    "description": "OperatorType: The operator type used for filtering, e.g., NumberIn, StringContains, BoolEquals and others.",
+                    "enum": [
+                      "NumberIn"
+                    ],
+                    "type": "string"
+                  },
+                  "values": {
+                    "description": "Values: The set of filter values.",
+                    "items": {
+                      "type": "number"
+                    },
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "operatorType"
+                ],
+                "type": "object"
+              },
+              "numberLessThan": {
+                "description": "NumberLessThan: Mutually exclusive with all other properties",
+                "properties": {
+                  "key": {
+                    "description": "Key: The field/property in the event based on which you want to filter.",
+                    "type": "string"
+                  },
+                  "operatorType": {
+                    "description": "OperatorType: The operator type used for filtering, e.g., NumberIn, StringContains, BoolEquals and others.",
+                    "enum": [
+                      "NumberLessThan"
+                    ],
+                    "type": "string"
+                  },
+                  "value": {
+                    "description": "Value: The filter value.",
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "operatorType"
+                ],
+                "type": "object"
+              },
+              "numberLessThanOrEquals": {
+                "description": "NumberLessThanOrEquals: Mutually exclusive with all other properties",
+                "properties": {
+                  "key": {
+                    "description": "Key: The field/property in the event based on which you want to filter.",
+                    "type": "string"
+                  },
+                  "operatorType": {
+                    "description": "OperatorType: The operator type used for filtering, e.g., NumberIn, StringContains, BoolEquals and others.",
+                    "enum": [
+                      "NumberLessThanOrEquals"
+                    ],
+                    "type": "string"
+                  },
+                  "value": {
+                    "description": "Value: The filter value.",
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "operatorType"
+                ],
+                "type": "object"
+              },
+              "numberNotIn": {
+                "description": "NumberNotIn: Mutually exclusive with all other properties",
+                "properties": {
+                  "key": {
+                    "description": "Key: The field/property in the event based on which you want to filter.",
+                    "type": "string"
+                  },
+                  "operatorType": {
+                    "description": "OperatorType: The operator type used for filtering, e.g., NumberIn, StringContains, BoolEquals and others.",
+                    "enum": [
+                      "NumberNotIn"
+                    ],
+                    "type": "string"
+                  },
+                  "values": {
+                    "description": "Values: The set of filter values.",
+                    "items": {
+                      "type": "number"
+                    },
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "operatorType"
+                ],
+                "type": "object"
+              },
+              "stringBeginsWith": {
+                "description": "StringBeginsWith: Mutually exclusive with all other properties",
+                "properties": {
+                  "key": {
+                    "description": "Key: The field/property in the event based on which you want to filter.",
+                    "type": "string"
+                  },
+                  "operatorType": {
+                    "description": "OperatorType: The operator type used for filtering, e.g., NumberIn, StringContains, BoolEquals and others.",
+                    "enum": [
+                      "StringBeginsWith"
+                    ],
+                    "type": "string"
+                  },
+                  "values": {
+                    "description": "Values: The set of filter values.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "operatorType"
+                ],
+                "type": "object"
+              },
+              "stringContains": {
+                "description": "StringContains: Mutually exclusive with all other properties",
+                "properties": {
+                  "key": {
+                    "description": "Key: The field/property in the event based on which you want to filter.",
+                    "type": "string"
+                  },
+                  "operatorType": {
+                    "description": "OperatorType: The operator type used for filtering, e.g., NumberIn, StringContains, BoolEquals and others.",
+                    "enum": [
+                      "StringContains"
+                    ],
+                    "type": "string"
+                  },
+                  "values": {
+                    "description": "Values: The set of filter values.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "operatorType"
+                ],
+                "type": "object"
+              },
+              "stringEndsWith": {
+                "description": "StringEndsWith: Mutually exclusive with all other properties",
+                "properties": {
+                  "key": {
+                    "description": "Key: The field/property in the event based on which you want to filter.",
+                    "type": "string"
+                  },
+                  "operatorType": {
+                    "description": "OperatorType: The operator type used for filtering, e.g., NumberIn, StringContains, BoolEquals and others.",
+                    "enum": [
+                      "StringEndsWith"
+                    ],
+                    "type": "string"
+                  },
+                  "values": {
+                    "description": "Values: The set of filter values.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "operatorType"
+                ],
+                "type": "object"
+              },
+              "stringIn": {
+                "description": "StringIn: Mutually exclusive with all other properties",
+                "properties": {
+                  "key": {
+                    "description": "Key: The field/property in the event based on which you want to filter.",
+                    "type": "string"
+                  },
+                  "operatorType": {
+                    "description": "OperatorType: The operator type used for filtering, e.g., NumberIn, StringContains, BoolEquals and others.",
+                    "enum": [
+                      "StringIn"
+                    ],
+                    "type": "string"
+                  },
+                  "values": {
+                    "description": "Values: The set of filter values.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "operatorType"
+                ],
+                "type": "object"
+              },
+              "stringNotIn": {
+                "description": "StringNotIn: Mutually exclusive with all other properties",
+                "properties": {
+                  "key": {
+                    "description": "Key: The field/property in the event based on which you want to filter.",
+                    "type": "string"
+                  },
+                  "operatorType": {
+                    "description": "OperatorType: The operator type used for filtering, e.g., NumberIn, StringContains, BoolEquals and others.",
+                    "enum": [
+                      "StringNotIn"
+                    ],
+                    "type": "string"
+                  },
+                  "values": {
+                    "description": "Values: The set of filter values.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "operatorType"
+                ],
+                "type": "object"
+              }
+            },
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "includedEventTypes": {
+          "description": "IncludedEventTypes: A list of applicable event types that need to be part of the event subscription. If it is desired to\nsubscribe to all default event types, set the IncludedEventTypes to null.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "isSubjectCaseSensitive": {
+          "description": "IsSubjectCaseSensitive: Specifies if the SubjectBeginsWith and SubjectEndsWith properties of the filter\nshould be compared in a case sensitive manner.",
+          "type": "boolean"
+        },
+        "subjectBeginsWith": {
+          "description": "SubjectBeginsWith: An optional string to filter events for an event subscription based on a resource path prefix.\nThe format of this depends on the publisher of the events.\nWildcard characters are not supported in this path.",
+          "type": "string"
+        },
+        "subjectEndsWith": {
+          "description": "SubjectEndsWith: An optional string to filter events for an event subscription based on a resource path suffix.\nWildcard characters are not supported in this path.",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "labels": {
+      "description": "Labels: List of user defined labels.",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "operatorSpec": {
+      "description": "OperatorSpec: The specification for configuring operator behavior. This field is interpreted by the operator and not\npassed directly to Azure",
+      "properties": {
+        "configMapExpressions": {
+          "description": "ConfigMapExpressions: configures where to place operator written dynamic ConfigMaps (created with CEL expressions).",
+          "items": {
+            "description": "DestinationExpression is a CEL expression and a destination to store the result in. The destination may\nbe a secret or a configmap. The value of the expression is stored at the specified location in\nthe destination.",
+            "properties": {
+              "annotations": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Annotations is an optional set of annotations to apply to the destination resource.",
+                "type": "object"
+              },
+              "key": {
+                "description": "Key is the key in the ConfigMap or Secret being written to. If the CEL expression in Value returns a string\nthis is required to identify what key to write to. If the CEL expression in Value returns a map[string]string\nKey must not be set, instead the keys written will be determined dynamically based on the keys of the resulting\nmap[string]string.",
+                "type": "string"
+              },
+              "labels": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Labels is an optional set of labels to apply to the destination resource.",
+                "type": "object"
+              },
+              "name": {
+                "description": "Name is the name of the Kubernetes configmap or secret to write to.\nThe configmap or secret will be created in the same namespace as the resource.",
+                "type": "string"
+              },
+              "value": {
+                "description": "Value is a CEL expression. The CEL expression may return a string or a map[string]string. For more information\non CEL in ASO see https://azure.github.io/azure-service-operator/guide/expressions/",
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "value"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "secretExpressions": {
+          "description": "SecretExpressions: configures where to place operator written dynamic secrets (created with CEL expressions).",
+          "items": {
+            "description": "DestinationExpression is a CEL expression and a destination to store the result in. The destination may\nbe a secret or a configmap. The value of the expression is stored at the specified location in\nthe destination.",
+            "properties": {
+              "annotations": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Annotations is an optional set of annotations to apply to the destination resource.",
+                "type": "object"
+              },
+              "key": {
+                "description": "Key is the key in the ConfigMap or Secret being written to. If the CEL expression in Value returns a string\nthis is required to identify what key to write to. If the CEL expression in Value returns a map[string]string\nKey must not be set, instead the keys written will be determined dynamically based on the keys of the resulting\nmap[string]string.",
+                "type": "string"
+              },
+              "labels": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Labels is an optional set of labels to apply to the destination resource.",
+                "type": "object"
+              },
+              "name": {
+                "description": "Name is the name of the Kubernetes configmap or secret to write to.\nThe configmap or secret will be created in the same namespace as the resource.",
+                "type": "string"
+              },
+              "value": {
+                "description": "Value is a CEL expression. The CEL expression may return a string or a map[string]string. For more information\non CEL in ASO see https://azure.github.io/azure-service-operator/guide/expressions/",
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "value"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "owner": {
+      "description": "Owner: The owner of the resource. The owner controls where the resource goes when it is deployed. The owner also\ncontrols the resources lifecycle. When the owner is deleted the resource will also be deleted. This resource is an\nextension resource, which means that any other Azure resource can be its owner.",
+      "properties": {
+        "armId": {
+          "description": "Ownership across namespaces is not supported.",
+          "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+          "type": "string"
+        },
+        "group": {
+          "description": "Group is the Kubernetes group of the resource.",
+          "type": "string"
+        },
+        "kind": {
+          "description": "Kind is the Kubernetes kind of the resource.",
+          "type": "string"
+        },
+        "name": {
+          "description": "This is the name of the Kubernetes resource to reference.",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "retryPolicy": {
+      "description": "RetryPolicy: The retry policy for events. This can be used to configure maximum number of delivery attempts and time to\nlive for events.",
+      "properties": {
+        "eventTimeToLiveInMinutes": {
+          "description": "EventTimeToLiveInMinutes: Time To Live (in minutes) for events.",
+          "type": "integer"
+        },
+        "maxDeliveryAttempts": {
+          "description": "MaxDeliveryAttempts: Maximum number of delivery retry attempts for events.",
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "required": [
+    "owner"
+  ],
+  "title": "Azure Eventgrid EventSubscription",
+  "type": "object"
+}

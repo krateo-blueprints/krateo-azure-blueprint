@@ -1,0 +1,336 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "description": "Provision an Azure Cache RedisEnterpriseDatabase via Azure Service Operator. Fields mirror the cache.azure.com/v1api20250401 RedisEnterpriseDatabase spec.",
+  "properties": {
+    "accessKeysAuthentication": {
+      "description": "AccessKeysAuthentication: This property can be Enabled/Disabled to allow or deny access with the current access keys.\nCan be updated even after database is created.",
+      "enum": [
+        "Disabled",
+        "Enabled"
+      ],
+      "type": "string"
+    },
+    "azureName": {
+      "description": "AzureName: The name of the resource in Azure. This is often the same as the name of the resource in Kubernetes but it\ndoesn't have to be.",
+      "type": "string"
+    },
+    "clientProtocol": {
+      "description": "ClientProtocol: Specifies whether redis clients can connect using TLS-encrypted or plaintext redis protocols. Default is\nTLS-encrypted.",
+      "enum": [
+        "Encrypted",
+        "Plaintext"
+      ],
+      "type": "string"
+    },
+    "clusteringPolicy": {
+      "description": "ClusteringPolicy: Clustering policy - default is OSSCluster. This property must be chosen at create time, and cannot be\nchanged without deleting the database.",
+      "enum": [
+        "EnterpriseCluster",
+        "OSSCluster"
+      ],
+      "type": "string"
+    },
+    "credentialFrom": {
+      "default": "",
+      "description": "Name of a Kubernetes Secret holding the Azure credential to use for this resource. Rendered as the serviceoperator.azure.com/credential-from annotation. Leave empty to inherit the credential from the namespace, then from the operator's global credential. The resource's subscription and resource group come from spec.owner, not from this field.",
+      "title": "Azure credential Secret",
+      "type": "string"
+    },
+    "deferUpgrade": {
+      "description": "DeferUpgrade: Option to defer upgrade when newest version is released - default is NotDeferred. Learn more:\nhttps://aka.ms/redisversionupgrade",
+      "enum": [
+        "Deferred",
+        "NotDeferred"
+      ],
+      "type": "string"
+    },
+    "evictionPolicy": {
+      "description": "EvictionPolicy: Redis eviction policy - default is VolatileLRU",
+      "enum": [
+        "AllKeysLFU",
+        "AllKeysLRU",
+        "AllKeysRandom",
+        "NoEviction",
+        "VolatileLFU",
+        "VolatileLRU",
+        "VolatileRandom",
+        "VolatileTTL"
+      ],
+      "type": "string"
+    },
+    "geoReplication": {
+      "description": "GeoReplication: Optional set of properties to configure geo replication for this database.",
+      "properties": {
+        "groupNickname": {
+          "description": "GroupNickname: Name for the group of linked database resources",
+          "type": "string"
+        },
+        "linkedDatabases": {
+          "description": "LinkedDatabases: List of database resources to link with this database",
+          "items": {
+            "description": "Specifies details of a linked database resource.",
+            "properties": {
+              "reference": {
+                "description": "Reference: Resource ID of a database resource to link with this database.",
+                "properties": {
+                  "armId": {
+                    "description": "ARMID is a string of the form /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}.\nThe /resourcegroups/{resourceGroupName} bit is optional as some resources are scoped at the subscription level\nARMID is mutually exclusive with Group, Kind, Namespace and Name.",
+                    "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+                    "type": "string"
+                  },
+                  "group": {
+                    "description": "Group is the Kubernetes group of the resource.",
+                    "type": "string"
+                  },
+                  "kind": {
+                    "description": "Kind is the Kubernetes kind of the resource.",
+                    "type": "string"
+                  },
+                  "name": {
+                    "description": "Name is the Kubernetes name of the resource.",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "modules": {
+      "description": "Modules: Optional set of redis modules to enable in this database - modules can only be added at creation time.",
+      "items": {
+        "description": "Specifies configuration of a redis module",
+        "properties": {
+          "args": {
+            "description": "Args: Configuration options for the module, e.g. 'ERROR_RATE 0.01 INITIAL_SIZE 400'.",
+            "type": "string"
+          },
+          "name": {
+            "description": "Name: The name of the module, e.g. 'RedisBloom', 'RediSearch', 'RedisTimeSeries'",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "operatorSpec": {
+      "description": "OperatorSpec: The specification for configuring operator behavior. This field is interpreted by the operator and not\npassed directly to Azure",
+      "properties": {
+        "configMapExpressions": {
+          "description": "ConfigMapExpressions: configures where to place operator written dynamic ConfigMaps (created with CEL expressions).",
+          "items": {
+            "description": "DestinationExpression is a CEL expression and a destination to store the result in. The destination may\nbe a secret or a configmap. The value of the expression is stored at the specified location in\nthe destination.",
+            "properties": {
+              "annotations": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Annotations is an optional set of annotations to apply to the destination resource.",
+                "type": "object"
+              },
+              "key": {
+                "description": "Key is the key in the ConfigMap or Secret being written to. If the CEL expression in Value returns a string\nthis is required to identify what key to write to. If the CEL expression in Value returns a map[string]string\nKey must not be set, instead the keys written will be determined dynamically based on the keys of the resulting\nmap[string]string.",
+                "type": "string"
+              },
+              "labels": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Labels is an optional set of labels to apply to the destination resource.",
+                "type": "object"
+              },
+              "name": {
+                "description": "Name is the name of the Kubernetes configmap or secret to write to.\nThe configmap or secret will be created in the same namespace as the resource.",
+                "type": "string"
+              },
+              "value": {
+                "description": "Value is a CEL expression. The CEL expression may return a string or a map[string]string. For more information\non CEL in ASO see https://azure.github.io/azure-service-operator/guide/expressions/",
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "value"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "secretExpressions": {
+          "description": "SecretExpressions: configures where to place operator written dynamic secrets (created with CEL expressions).",
+          "items": {
+            "description": "DestinationExpression is a CEL expression and a destination to store the result in. The destination may\nbe a secret or a configmap. The value of the expression is stored at the specified location in\nthe destination.",
+            "properties": {
+              "annotations": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Annotations is an optional set of annotations to apply to the destination resource.",
+                "type": "object"
+              },
+              "key": {
+                "description": "Key is the key in the ConfigMap or Secret being written to. If the CEL expression in Value returns a string\nthis is required to identify what key to write to. If the CEL expression in Value returns a map[string]string\nKey must not be set, instead the keys written will be determined dynamically based on the keys of the resulting\nmap[string]string.",
+                "type": "string"
+              },
+              "labels": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Labels is an optional set of labels to apply to the destination resource.",
+                "type": "object"
+              },
+              "name": {
+                "description": "Name is the name of the Kubernetes configmap or secret to write to.\nThe configmap or secret will be created in the same namespace as the resource.",
+                "type": "string"
+              },
+              "value": {
+                "description": "Value is a CEL expression. The CEL expression may return a string or a map[string]string. For more information\non CEL in ASO see https://azure.github.io/azure-service-operator/guide/expressions/",
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "value"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "secrets": {
+          "description": "Secrets: configures where to place Azure generated secrets.",
+          "properties": {
+            "primaryKey": {
+              "description": "PrimaryKey: indicates where the PrimaryKey secret should be placed. If omitted, the secret will not be retrieved from\nAzure.",
+              "properties": {
+                "annotations": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "description": "Annotations is an optional set of annotations to apply to the secret.",
+                  "type": "object"
+                },
+                "key": {
+                  "description": "Key is the key in the Kubernetes secret being referenced.",
+                  "type": "string"
+                },
+                "labels": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "description": "Labels is an optional set of labels to apply to the secret.",
+                  "type": "object"
+                },
+                "name": {
+                  "description": "Name is the name of the Kubernetes secret to write to.\nThe secret will be created in the same namespace as the resource.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "key",
+                "name"
+              ],
+              "type": "object"
+            },
+            "secondaryKey": {
+              "description": "SecondaryKey: indicates where the SecondaryKey secret should be placed. If omitted, the secret will not be retrieved\nfrom Azure.",
+              "properties": {
+                "annotations": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "description": "Annotations is an optional set of annotations to apply to the secret.",
+                  "type": "object"
+                },
+                "key": {
+                  "description": "Key is the key in the Kubernetes secret being referenced.",
+                  "type": "string"
+                },
+                "labels": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "description": "Labels is an optional set of labels to apply to the secret.",
+                  "type": "object"
+                },
+                "name": {
+                  "description": "Name is the name of the Kubernetes secret to write to.\nThe secret will be created in the same namespace as the resource.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "key",
+                "name"
+              ],
+              "type": "object"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "owner": {
+      "description": "Owner: The owner of the resource. The owner controls where the resource goes when it is deployed. The owner also\ncontrols the resources lifecycle. When the owner is deleted the resource will also be deleted. Owner is expected to be a\nreference to a cache.azure.com/RedisEnterprise resource",
+      "properties": {
+        "armId": {
+          "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+          "type": "string"
+        },
+        "name": {
+          "description": "This is the name of the Kubernetes resource to reference.",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "persistence": {
+      "description": "Persistence: Persistence settings",
+      "properties": {
+        "aofEnabled": {
+          "description": "AofEnabled: Sets whether AOF is enabled. Note that at most one of AOF or RDB persistence may be enabled.",
+          "type": "boolean"
+        },
+        "aofFrequency": {
+          "description": "AofFrequency: Sets the frequency at which data is written to disk. Defaults to '1s', meaning 'every second'. Note that\nthe 'always' setting is deprecated, because of its performance impact.",
+          "enum": [
+            "1s",
+            "always"
+          ],
+          "type": "string"
+        },
+        "rdbEnabled": {
+          "description": "RdbEnabled: Sets whether RDB is enabled. Note that at most one of AOF or RDB persistence may be enabled.",
+          "type": "boolean"
+        },
+        "rdbFrequency": {
+          "description": "RdbFrequency: Sets the frequency at which a snapshot of the database is created.",
+          "enum": [
+            "12h",
+            "1h",
+            "6h"
+          ],
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "port": {
+      "description": "Port: TCP port of the database endpoint. Specified at create time. Defaults to an available port.",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "owner"
+  ],
+  "title": "Azure Cache RedisEnterpriseDatabase",
+  "type": "object"
+}

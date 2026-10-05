@@ -1,0 +1,510 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "description": "Provision an Azure Machinelearningservices Registry via Azure Service Operator. Fields mirror the machinelearningservices.azure.com/v1api20240401 Registry spec.",
+  "properties": {
+    "azureName": {
+      "description": "AzureName: The name of the resource in Azure. This is often the same as the name of the resource in Kubernetes but it\ndoesn't have to be.",
+      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9\\-_]{2,32}$",
+      "type": "string"
+    },
+    "credentialFrom": {
+      "default": "",
+      "description": "Name of a Kubernetes Secret holding the Azure credential to use for this resource. Rendered as the serviceoperator.azure.com/credential-from annotation. Leave empty to inherit the credential from the namespace, then from the operator's global credential. The resource's subscription and resource group come from spec.owner, not from this field.",
+      "title": "Azure credential Secret",
+      "type": "string"
+    },
+    "discoveryUrl": {
+      "description": "DiscoveryUrl: Discovery URL for the Registry",
+      "type": "string"
+    },
+    "identity": {
+      "description": "Identity: Managed service identity (system assigned and/or user assigned identities)",
+      "properties": {
+        "type": {
+          "description": "Type: Type of managed service identity (where both SystemAssigned and UserAssigned types are allowed).",
+          "enum": [
+            "None",
+            "SystemAssigned",
+            "SystemAssigned,UserAssigned",
+            "UserAssigned"
+          ],
+          "type": "string"
+        },
+        "userAssignedIdentities": {
+          "items": {
+            "description": "Information about the user assigned identity for the resource",
+            "properties": {
+              "reference": {
+                "description": "ResourceReference represents a resource reference, either to a Kubernetes resource or directly to an Azure resource via ARMID",
+                "properties": {
+                  "armId": {
+                    "description": "ARMID is a string of the form /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}.\nThe /resourcegroups/{resourceGroupName} bit is optional as some resources are scoped at the subscription level\nARMID is mutually exclusive with Group, Kind, Namespace and Name.",
+                    "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+                    "type": "string"
+                  },
+                  "group": {
+                    "description": "Group is the Kubernetes group of the resource.",
+                    "type": "string"
+                  },
+                  "kind": {
+                    "description": "Kind is the Kubernetes kind of the resource.",
+                    "type": "string"
+                  },
+                  "name": {
+                    "description": "Name is the Kubernetes name of the resource.",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "type": "object"
+    },
+    "intellectualPropertyPublisher": {
+      "description": "IntellectualPropertyPublisher: IntellectualPropertyPublisher for the registry",
+      "type": "string"
+    },
+    "kind": {
+      "description": "Kind: Metadata used by portal/tooling/etc to render different UX experiences for resources of the same type.",
+      "type": "string"
+    },
+    "location": {
+      "description": "Location: The geo-location where the resource lives",
+      "type": "string"
+    },
+    "managedResourceGroup": {
+      "description": "ManagedResourceGroup: ResourceId of the managed RG if the registry has system created resources",
+      "properties": {
+        "resourceReference": {
+          "description": "ResourceReference: Arm ResourceId is in the format\n\"/subscriptions/{SubscriptionId}/resourceGroups/{ResourceGroupName}/providers/Microsoft.Storage/storageAccounts/{StorageAccountName}\"\nor\n\"/subscriptions/{SubscriptionId}/resourceGroups/{ResourceGroupName}/providers/Microsoft.ContainerRegistry/registries/{AcrName}\"",
+          "properties": {
+            "armId": {
+              "description": "ARMID is a string of the form /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}.\nThe /resourcegroups/{resourceGroupName} bit is optional as some resources are scoped at the subscription level\nARMID is mutually exclusive with Group, Kind, Namespace and Name.",
+              "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+              "type": "string"
+            },
+            "group": {
+              "description": "Group is the Kubernetes group of the resource.",
+              "type": "string"
+            },
+            "kind": {
+              "description": "Kind is the Kubernetes kind of the resource.",
+              "type": "string"
+            },
+            "name": {
+              "description": "Name is the Kubernetes name of the resource.",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "mlFlowRegistryUri": {
+      "description": "MlFlowRegistryUri: MLFlow Registry URI for the Registry",
+      "type": "string"
+    },
+    "operatorSpec": {
+      "description": "OperatorSpec: The specification for configuring operator behavior. This field is interpreted by the operator and not\npassed directly to Azure",
+      "properties": {
+        "configMapExpressions": {
+          "description": "ConfigMapExpressions: configures where to place operator written dynamic ConfigMaps (created with CEL expressions).",
+          "items": {
+            "description": "DestinationExpression is a CEL expression and a destination to store the result in. The destination may\nbe a secret or a configmap. The value of the expression is stored at the specified location in\nthe destination.",
+            "properties": {
+              "annotations": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Annotations is an optional set of annotations to apply to the destination resource.",
+                "type": "object"
+              },
+              "key": {
+                "description": "Key is the key in the ConfigMap or Secret being written to. If the CEL expression in Value returns a string\nthis is required to identify what key to write to. If the CEL expression in Value returns a map[string]string\nKey must not be set, instead the keys written will be determined dynamically based on the keys of the resulting\nmap[string]string.",
+                "type": "string"
+              },
+              "labels": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Labels is an optional set of labels to apply to the destination resource.",
+                "type": "object"
+              },
+              "name": {
+                "description": "Name is the name of the Kubernetes configmap or secret to write to.\nThe configmap or secret will be created in the same namespace as the resource.",
+                "type": "string"
+              },
+              "value": {
+                "description": "Value is a CEL expression. The CEL expression may return a string or a map[string]string. For more information\non CEL in ASO see https://azure.github.io/azure-service-operator/guide/expressions/",
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "value"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "configMaps": {
+          "description": "ConfigMaps: configures where to place operator written ConfigMaps.",
+          "properties": {
+            "discoveryUrl": {
+              "description": "DiscoveryUrl: indicates where the DiscoveryUrl config map should be placed. If omitted, no config map will be created.",
+              "properties": {
+                "annotations": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "description": "Annotations is an optional set of annotations to apply to the ConfigMap.",
+                  "type": "object"
+                },
+                "key": {
+                  "description": "Key is the key in the ConfigMap being referenced",
+                  "type": "string"
+                },
+                "labels": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "description": "Labels is an optional set of labels to apply to the ConfigMap.",
+                  "type": "object"
+                },
+                "name": {
+                  "description": "Name is the name of the Kubernetes ConfigMap to write to.\nThe ConfigMap will be created in the same namespace as the resource.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "key",
+                "name"
+              ],
+              "type": "object"
+            },
+            "mlFlowRegistryUri": {
+              "description": "MlFlowRegistryUri: indicates where the MlFlowRegistryUri config map should be placed. If omitted, no config map will be\ncreated.",
+              "properties": {
+                "annotations": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "description": "Annotations is an optional set of annotations to apply to the ConfigMap.",
+                  "type": "object"
+                },
+                "key": {
+                  "description": "Key is the key in the ConfigMap being referenced",
+                  "type": "string"
+                },
+                "labels": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "description": "Labels is an optional set of labels to apply to the ConfigMap.",
+                  "type": "object"
+                },
+                "name": {
+                  "description": "Name is the name of the Kubernetes ConfigMap to write to.\nThe ConfigMap will be created in the same namespace as the resource.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "key",
+                "name"
+              ],
+              "type": "object"
+            }
+          },
+          "type": "object"
+        },
+        "secretExpressions": {
+          "description": "SecretExpressions: configures where to place operator written dynamic secrets (created with CEL expressions).",
+          "items": {
+            "description": "DestinationExpression is a CEL expression and a destination to store the result in. The destination may\nbe a secret or a configmap. The value of the expression is stored at the specified location in\nthe destination.",
+            "properties": {
+              "annotations": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Annotations is an optional set of annotations to apply to the destination resource.",
+                "type": "object"
+              },
+              "key": {
+                "description": "Key is the key in the ConfigMap or Secret being written to. If the CEL expression in Value returns a string\nthis is required to identify what key to write to. If the CEL expression in Value returns a map[string]string\nKey must not be set, instead the keys written will be determined dynamically based on the keys of the resulting\nmap[string]string.",
+                "type": "string"
+              },
+              "labels": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Labels is an optional set of labels to apply to the destination resource.",
+                "type": "object"
+              },
+              "name": {
+                "description": "Name is the name of the Kubernetes configmap or secret to write to.\nThe configmap or secret will be created in the same namespace as the resource.",
+                "type": "string"
+              },
+              "value": {
+                "description": "Value is a CEL expression. The CEL expression may return a string or a map[string]string. For more information\non CEL in ASO see https://azure.github.io/azure-service-operator/guide/expressions/",
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "value"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "owner": {
+      "description": "Owner: The owner of the resource. The owner controls where the resource goes when it is deployed. The owner also\ncontrols the resources lifecycle. When the owner is deleted the resource will also be deleted. Owner is expected to be a\nreference to a resources.azure.com/ResourceGroup resource",
+      "properties": {
+        "armId": {
+          "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+          "type": "string"
+        },
+        "name": {
+          "description": "This is the name of the Kubernetes resource to reference.",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "publicNetworkAccess": {
+      "description": "PublicNetworkAccess: Is the Registry accessible from the internet?\nPossible values: \"Enabled\" or \"Disabled\"",
+      "type": "string"
+    },
+    "regionDetails": {
+      "description": "RegionDetails: Details of each region the registry is in",
+      "items": {
+        "description": "Details for each region the registry is in",
+        "properties": {
+          "acrDetails": {
+            "description": "AcrDetails: List of ACR accounts",
+            "items": {
+              "description": "Details of ACR account to be used for the Registry",
+              "properties": {
+                "systemCreatedAcrAccount": {
+                  "description": "SystemCreatedAcrAccount: Details of system created ACR account to be used for the Registry",
+                  "properties": {
+                    "acrAccountName": {
+                      "description": "AcrAccountName: Name of the ACR account",
+                      "type": "string"
+                    },
+                    "acrAccountSku": {
+                      "description": "AcrAccountSku: SKU of the ACR account",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              },
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "location": {
+            "description": "Location: The location where the registry exists",
+            "type": "string"
+          },
+          "storageAccountDetails": {
+            "description": "StorageAccountDetails: List of storage accounts",
+            "items": {
+              "description": "Details of storage account to be used for the Registry",
+              "properties": {
+                "systemCreatedStorageAccount": {
+                  "description": "SystemCreatedStorageAccount: Details of system created storage account to be used for the registry",
+                  "properties": {
+                    "allowBlobPublicAccess": {
+                      "description": "AllowBlobPublicAccess: Public blob access allowed",
+                      "type": "boolean"
+                    },
+                    "storageAccountHnsEnabled": {
+                      "description": "StorageAccountHnsEnabled: HNS enabled for storage account",
+                      "type": "boolean"
+                    },
+                    "storageAccountName": {
+                      "description": "StorageAccountName: Name of the storage account",
+                      "type": "string"
+                    },
+                    "storageAccountType": {
+                      "description": "StorageAccountType: Allowed values:\n\"Standard_LRS\",\n\"Standard_GRS\",\n\"Standard_RAGRS\",\n\"Standard_ZRS\",\n\"Standard_GZRS\",\n\"Standard_RAGZRS\",\n\"Premium_LRS\",\n\"Premium_ZRS\"",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              },
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "registryPrivateEndpointConnections": {
+      "description": "RegistryPrivateEndpointConnections: Private endpoint connections info used for pending connections in private link portal",
+      "items": {
+        "description": "Private endpoint connection definition.",
+        "properties": {
+          "groupIds": {
+            "description": "GroupIds: The group ids",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "location": {
+            "description": "Location: Same as workspace location.",
+            "type": "string"
+          },
+          "privateEndpoint": {
+            "description": "PrivateEndpoint: The PE network resource that is linked to this PE connection.",
+            "properties": {
+              "subnetArmReference": {
+                "description": "SubnetArmReference: The subnetId that the private endpoint is connected to.",
+                "properties": {
+                  "armId": {
+                    "description": "ARMID is a string of the form /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}.\nThe /resourcegroups/{resourceGroupName} bit is optional as some resources are scoped at the subscription level\nARMID is mutually exclusive with Group, Kind, Namespace and Name.",
+                    "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+                    "type": "string"
+                  },
+                  "group": {
+                    "description": "Group is the Kubernetes group of the resource.",
+                    "type": "string"
+                  },
+                  "kind": {
+                    "description": "Kind is the Kubernetes kind of the resource.",
+                    "type": "string"
+                  },
+                  "name": {
+                    "description": "Name is the Kubernetes name of the resource.",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          },
+          "provisioningState": {
+            "description": "ProvisioningState: One of null, \"Succeeded\", \"Provisioning\", \"Failed\". While not approved, it's null.",
+            "type": "string"
+          },
+          "reference": {
+            "description": "Reference: This is the private endpoint connection name created on SRP\nFull resource id:\n/subscriptions/{subId}/resourceGroups/{rgName}/providers/Microsoft.MachineLearningServices/{resourceType}/{resourceName}/registryPrivateEndpointConnections/{peConnectionName}",
+            "properties": {
+              "armId": {
+                "description": "ARMID is a string of the form /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}.\nThe /resourcegroups/{resourceGroupName} bit is optional as some resources are scoped at the subscription level\nARMID is mutually exclusive with Group, Kind, Namespace and Name.",
+                "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+                "type": "string"
+              },
+              "group": {
+                "description": "Group is the Kubernetes group of the resource.",
+                "type": "string"
+              },
+              "kind": {
+                "description": "Kind is the Kubernetes kind of the resource.",
+                "type": "string"
+              },
+              "name": {
+                "description": "Name is the Kubernetes name of the resource.",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "registryPrivateLinkServiceConnectionState": {
+            "description": "RegistryPrivateLinkServiceConnectionState: The connection state.",
+            "properties": {
+              "actionsRequired": {
+                "description": "ActionsRequired: Some RP chose \"None\". Other RPs use this for region expansion.",
+                "type": "string"
+              },
+              "description": {
+                "description": "Description: User-defined message that, per NRP doc, may be used for approval-related message.",
+                "type": "string"
+              },
+              "status": {
+                "description": "Status: Connection status of the service consumer with the service provider",
+                "enum": [
+                  "Approved",
+                  "Disconnected",
+                  "Pending",
+                  "Rejected"
+                ],
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "sku": {
+      "description": "Sku: Sku details required for ARM contract for Autoscaling.",
+      "properties": {
+        "capacity": {
+          "description": "Capacity: If the SKU supports scale out/in then the capacity integer should be included. If scale out/in is not possible\nfor the resource this may be omitted.",
+          "type": "integer"
+        },
+        "family": {
+          "description": "Family: If the service has different generations of hardware, for the same SKU, then that can be captured here.",
+          "type": "string"
+        },
+        "name": {
+          "description": "Name: The name of the SKU. Ex - P3. It is typically a letter+number code",
+          "type": "string"
+        },
+        "size": {
+          "description": "Size: The SKU size. When the name field is the combination of tier and some other value, this would be the standalone\ncode.",
+          "type": "string"
+        },
+        "tier": {
+          "description": "Tier: This field is required to be implemented by the Resource Provider if the service has more than one tier, but is\nnot  required on a PUT.",
+          "enum": [
+            "Basic",
+            "Free",
+            "Premium",
+            "Standard"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "type": "object"
+    },
+    "tags": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Tags: Resource tags.",
+      "type": "object"
+    }
+  },
+  "required": [
+    "location",
+    "owner"
+  ],
+  "title": "Azure Machinelearningservices Registry",
+  "type": "object"
+}

@@ -1,0 +1,565 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "description": "Provision an Azure Network NetworkInterface via Azure Service Operator. Fields mirror the network.azure.com/v1api20240301 NetworkInterface spec.",
+  "properties": {
+    "auxiliaryMode": {
+      "description": "AuxiliaryMode: Auxiliary mode of Network Interface resource.",
+      "enum": [
+        "AcceleratedConnections",
+        "Floating",
+        "MaxConnections",
+        "None"
+      ],
+      "type": "string"
+    },
+    "auxiliarySku": {
+      "description": "AuxiliarySku: Auxiliary sku of Network Interface resource.",
+      "enum": [
+        "A1",
+        "A2",
+        "A4",
+        "A8",
+        "None"
+      ],
+      "type": "string"
+    },
+    "azureName": {
+      "description": "AzureName: The name of the resource in Azure. This is often the same as the name of the resource in Kubernetes but it\ndoesn't have to be.",
+      "type": "string"
+    },
+    "credentialFrom": {
+      "default": "",
+      "description": "Name of a Kubernetes Secret holding the Azure credential to use for this resource. Rendered as the serviceoperator.azure.com/credential-from annotation. Leave empty to inherit the credential from the namespace, then from the operator's global credential. The resource's subscription and resource group come from spec.owner, not from this field.",
+      "title": "Azure credential Secret",
+      "type": "string"
+    },
+    "disableTcpStateTracking": {
+      "description": "DisableTcpStateTracking: Indicates whether to disable tcp state tracking.",
+      "type": "boolean"
+    },
+    "dnsSettings": {
+      "description": "DnsSettings: The DNS settings in network interface.",
+      "properties": {
+        "dnsServers": {
+          "description": "DnsServers: List of DNS servers IP addresses. Use 'AzureProvidedDNS' to switch to azure provided DNS resolution.\n'AzureProvidedDNS' value cannot be combined with other IPs, it must be the only value in dnsServers collection.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "internalDnsNameLabel": {
+          "description": "InternalDnsNameLabel: Relative DNS name for this NIC used for internal communications between VMs in the same virtual\nnetwork.",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "enableAcceleratedNetworking": {
+      "description": "EnableAcceleratedNetworking: If the network interface is configured for accelerated networking. Not applicable to VM\nsizes which require accelerated networking.",
+      "type": "boolean"
+    },
+    "enableIPForwarding": {
+      "description": "EnableIPForwarding: Indicates whether IP forwarding is enabled on this network interface.",
+      "type": "boolean"
+    },
+    "extendedLocation": {
+      "description": "ExtendedLocation: The extended location of the network interface.",
+      "properties": {
+        "name": {
+          "description": "Name: The name of the extended location.",
+          "type": "string"
+        },
+        "type": {
+          "description": "Type: The type of the extended location.",
+          "enum": [
+            "EdgeZone"
+          ],
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "ipConfigurations": {
+      "description": "IpConfigurations: A list of IPConfigurations of the network interface.",
+      "items": {
+        "description": "IPConfiguration in a network interface.",
+        "properties": {
+          "applicationGatewayBackendAddressPools": {
+            "description": "ApplicationGatewayBackendAddressPools: The reference to ApplicationGatewayBackendAddressPool resource.",
+            "items": {
+              "description": "Backend Address Pool of an application gateway.",
+              "properties": {
+                "reference": {
+                  "description": "Reference: Resource ID.",
+                  "properties": {
+                    "armId": {
+                      "description": "ARMID is a string of the form /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}.\nThe /resourcegroups/{resourceGroupName} bit is optional as some resources are scoped at the subscription level\nARMID is mutually exclusive with Group, Kind, Namespace and Name.",
+                      "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+                      "type": "string"
+                    },
+                    "group": {
+                      "description": "Group is the Kubernetes group of the resource.",
+                      "type": "string"
+                    },
+                    "kind": {
+                      "description": "Kind is the Kubernetes kind of the resource.",
+                      "type": "string"
+                    },
+                    "name": {
+                      "description": "Name is the Kubernetes name of the resource.",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              },
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "applicationSecurityGroups": {
+            "description": "ApplicationSecurityGroups: Application security groups in which the IP configuration is included.",
+            "items": {
+              "description": "An application security group in a resource group.",
+              "properties": {
+                "reference": {
+                  "description": "Reference: Resource ID.",
+                  "properties": {
+                    "armId": {
+                      "description": "ARMID is a string of the form /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}.\nThe /resourcegroups/{resourceGroupName} bit is optional as some resources are scoped at the subscription level\nARMID is mutually exclusive with Group, Kind, Namespace and Name.",
+                      "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+                      "type": "string"
+                    },
+                    "group": {
+                      "description": "Group is the Kubernetes group of the resource.",
+                      "type": "string"
+                    },
+                    "kind": {
+                      "description": "Kind is the Kubernetes kind of the resource.",
+                      "type": "string"
+                    },
+                    "name": {
+                      "description": "Name is the Kubernetes name of the resource.",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              },
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "gatewayLoadBalancer": {
+            "description": "GatewayLoadBalancer: The reference to gateway load balancer frontend IP.",
+            "properties": {
+              "reference": {
+                "description": "Reference: Resource ID.",
+                "properties": {
+                  "armId": {
+                    "description": "ARMID is a string of the form /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}.\nThe /resourcegroups/{resourceGroupName} bit is optional as some resources are scoped at the subscription level\nARMID is mutually exclusive with Group, Kind, Namespace and Name.",
+                    "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+                    "type": "string"
+                  },
+                  "group": {
+                    "description": "Group is the Kubernetes group of the resource.",
+                    "type": "string"
+                  },
+                  "kind": {
+                    "description": "Kind is the Kubernetes kind of the resource.",
+                    "type": "string"
+                  },
+                  "name": {
+                    "description": "Name is the Kubernetes name of the resource.",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          },
+          "loadBalancerBackendAddressPools": {
+            "description": "LoadBalancerBackendAddressPools: The reference to LoadBalancerBackendAddressPool resource.",
+            "items": {
+              "description": "Pool of backend IP addresses.",
+              "properties": {
+                "reference": {
+                  "description": "Reference: Resource ID.",
+                  "properties": {
+                    "armId": {
+                      "description": "ARMID is a string of the form /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}.\nThe /resourcegroups/{resourceGroupName} bit is optional as some resources are scoped at the subscription level\nARMID is mutually exclusive with Group, Kind, Namespace and Name.",
+                      "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+                      "type": "string"
+                    },
+                    "group": {
+                      "description": "Group is the Kubernetes group of the resource.",
+                      "type": "string"
+                    },
+                    "kind": {
+                      "description": "Kind is the Kubernetes kind of the resource.",
+                      "type": "string"
+                    },
+                    "name": {
+                      "description": "Name is the Kubernetes name of the resource.",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              },
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "loadBalancerInboundNatRules": {
+            "description": "LoadBalancerInboundNatRules: A list of references of LoadBalancerInboundNatRules.",
+            "items": {
+              "description": "Inbound NAT rule of the load balancer.",
+              "properties": {
+                "reference": {
+                  "description": "Reference: Resource ID.",
+                  "properties": {
+                    "armId": {
+                      "description": "ARMID is a string of the form /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}.\nThe /resourcegroups/{resourceGroupName} bit is optional as some resources are scoped at the subscription level\nARMID is mutually exclusive with Group, Kind, Namespace and Name.",
+                      "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+                      "type": "string"
+                    },
+                    "group": {
+                      "description": "Group is the Kubernetes group of the resource.",
+                      "type": "string"
+                    },
+                    "kind": {
+                      "description": "Kind is the Kubernetes kind of the resource.",
+                      "type": "string"
+                    },
+                    "name": {
+                      "description": "Name is the Kubernetes name of the resource.",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              },
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "name": {
+            "description": "Name: The name of the resource that is unique within a resource group. This name can be used to access the resource.",
+            "type": "string"
+          },
+          "primary": {
+            "description": "Primary: Whether this is a primary customer address on the network interface.",
+            "type": "boolean"
+          },
+          "privateIPAddress": {
+            "description": "PrivateIPAddress: Private IP address of the IP configuration. It can be a single IP address or a CIDR block in the\nformat \u003caddress\u003e/\u003cprefix-length\u003e.",
+            "type": "string"
+          },
+          "privateIPAddressPrefixLength": {
+            "description": "PrivateIPAddressPrefixLength: The private IP address prefix length. If specified and the allocation method is dynamic,\nthe service will allocate a CIDR block instead of a single IP address.",
+            "maximum": 128,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "privateIPAddressVersion": {
+            "description": "PrivateIPAddressVersion: Whether the specific IP configuration is IPv4 or IPv6. Default is IPv4.",
+            "enum": [
+              "IPv4",
+              "IPv6"
+            ],
+            "type": "string"
+          },
+          "privateIPAllocationMethod": {
+            "description": "PrivateIPAllocationMethod: The private IP address allocation method.",
+            "enum": [
+              "Dynamic",
+              "Static"
+            ],
+            "type": "string"
+          },
+          "publicIPAddress": {
+            "description": "PublicIPAddress: Public IP address bound to the IP configuration.",
+            "properties": {
+              "reference": {
+                "description": "Reference: Resource ID.",
+                "properties": {
+                  "armId": {
+                    "description": "ARMID is a string of the form /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}.\nThe /resourcegroups/{resourceGroupName} bit is optional as some resources are scoped at the subscription level\nARMID is mutually exclusive with Group, Kind, Namespace and Name.",
+                    "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+                    "type": "string"
+                  },
+                  "group": {
+                    "description": "Group is the Kubernetes group of the resource.",
+                    "type": "string"
+                  },
+                  "kind": {
+                    "description": "Kind is the Kubernetes kind of the resource.",
+                    "type": "string"
+                  },
+                  "name": {
+                    "description": "Name is the Kubernetes name of the resource.",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          },
+          "subnet": {
+            "description": "Subnet: Subnet bound to the IP configuration.",
+            "properties": {
+              "reference": {
+                "description": "Reference: Resource ID.",
+                "properties": {
+                  "armId": {
+                    "description": "ARMID is a string of the form /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}.\nThe /resourcegroups/{resourceGroupName} bit is optional as some resources are scoped at the subscription level\nARMID is mutually exclusive with Group, Kind, Namespace and Name.",
+                    "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+                    "type": "string"
+                  },
+                  "group": {
+                    "description": "Group is the Kubernetes group of the resource.",
+                    "type": "string"
+                  },
+                  "kind": {
+                    "description": "Kind is the Kubernetes kind of the resource.",
+                    "type": "string"
+                  },
+                  "name": {
+                    "description": "Name is the Kubernetes name of the resource.",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          },
+          "virtualNetworkTaps": {
+            "description": "VirtualNetworkTaps: The reference to Virtual Network Taps.",
+            "items": {
+              "description": "Virtual Network Tap resource.",
+              "properties": {
+                "reference": {
+                  "description": "Reference: Resource ID.",
+                  "properties": {
+                    "armId": {
+                      "description": "ARMID is a string of the form /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}.\nThe /resourcegroups/{resourceGroupName} bit is optional as some resources are scoped at the subscription level\nARMID is mutually exclusive with Group, Kind, Namespace and Name.",
+                      "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+                      "type": "string"
+                    },
+                    "group": {
+                      "description": "Group is the Kubernetes group of the resource.",
+                      "type": "string"
+                    },
+                    "kind": {
+                      "description": "Kind is the Kubernetes kind of the resource.",
+                      "type": "string"
+                    },
+                    "name": {
+                      "description": "Name is the Kubernetes name of the resource.",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              },
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "location": {
+      "description": "Location: Resource location.",
+      "type": "string"
+    },
+    "networkSecurityGroup": {
+      "description": "NetworkSecurityGroup: The reference to the NetworkSecurityGroup resource.",
+      "properties": {
+        "reference": {
+          "description": "Reference: Resource ID.",
+          "properties": {
+            "armId": {
+              "description": "ARMID is a string of the form /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}.\nThe /resourcegroups/{resourceGroupName} bit is optional as some resources are scoped at the subscription level\nARMID is mutually exclusive with Group, Kind, Namespace and Name.",
+              "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+              "type": "string"
+            },
+            "group": {
+              "description": "Group is the Kubernetes group of the resource.",
+              "type": "string"
+            },
+            "kind": {
+              "description": "Kind is the Kubernetes kind of the resource.",
+              "type": "string"
+            },
+            "name": {
+              "description": "Name is the Kubernetes name of the resource.",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "nicType": {
+      "description": "NicType: Type of Network Interface resource.",
+      "enum": [
+        "Elastic",
+        "Standard"
+      ],
+      "type": "string"
+    },
+    "operatorSpec": {
+      "description": "OperatorSpec: The specification for configuring operator behavior. This field is interpreted by the operator and not\npassed directly to Azure",
+      "properties": {
+        "configMapExpressions": {
+          "description": "ConfigMapExpressions: configures where to place operator written dynamic ConfigMaps (created with CEL expressions).",
+          "items": {
+            "description": "DestinationExpression is a CEL expression and a destination to store the result in. The destination may\nbe a secret or a configmap. The value of the expression is stored at the specified location in\nthe destination.",
+            "properties": {
+              "annotations": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Annotations is an optional set of annotations to apply to the destination resource.",
+                "type": "object"
+              },
+              "key": {
+                "description": "Key is the key in the ConfigMap or Secret being written to. If the CEL expression in Value returns a string\nthis is required to identify what key to write to. If the CEL expression in Value returns a map[string]string\nKey must not be set, instead the keys written will be determined dynamically based on the keys of the resulting\nmap[string]string.",
+                "type": "string"
+              },
+              "labels": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Labels is an optional set of labels to apply to the destination resource.",
+                "type": "object"
+              },
+              "name": {
+                "description": "Name is the name of the Kubernetes configmap or secret to write to.\nThe configmap or secret will be created in the same namespace as the resource.",
+                "type": "string"
+              },
+              "value": {
+                "description": "Value is a CEL expression. The CEL expression may return a string or a map[string]string. For more information\non CEL in ASO see https://azure.github.io/azure-service-operator/guide/expressions/",
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "value"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "secretExpressions": {
+          "description": "SecretExpressions: configures where to place operator written dynamic secrets (created with CEL expressions).",
+          "items": {
+            "description": "DestinationExpression is a CEL expression and a destination to store the result in. The destination may\nbe a secret or a configmap. The value of the expression is stored at the specified location in\nthe destination.",
+            "properties": {
+              "annotations": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Annotations is an optional set of annotations to apply to the destination resource.",
+                "type": "object"
+              },
+              "key": {
+                "description": "Key is the key in the ConfigMap or Secret being written to. If the CEL expression in Value returns a string\nthis is required to identify what key to write to. If the CEL expression in Value returns a map[string]string\nKey must not be set, instead the keys written will be determined dynamically based on the keys of the resulting\nmap[string]string.",
+                "type": "string"
+              },
+              "labels": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Labels is an optional set of labels to apply to the destination resource.",
+                "type": "object"
+              },
+              "name": {
+                "description": "Name is the name of the Kubernetes configmap or secret to write to.\nThe configmap or secret will be created in the same namespace as the resource.",
+                "type": "string"
+              },
+              "value": {
+                "description": "Value is a CEL expression. The CEL expression may return a string or a map[string]string. For more information\non CEL in ASO see https://azure.github.io/azure-service-operator/guide/expressions/",
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "value"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "owner": {
+      "description": "Owner: The owner of the resource. The owner controls where the resource goes when it is deployed. The owner also\ncontrols the resources lifecycle. When the owner is deleted the resource will also be deleted. Owner is expected to be a\nreference to a resources.azure.com/ResourceGroup resource",
+      "properties": {
+        "armId": {
+          "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+          "type": "string"
+        },
+        "name": {
+          "description": "This is the name of the Kubernetes resource to reference.",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "privateLinkService": {
+      "description": "PrivateLinkService: Privatelinkservice of the network interface resource.",
+      "properties": {
+        "reference": {
+          "description": "Reference: Resource ID.",
+          "properties": {
+            "armId": {
+              "description": "ARMID is a string of the form /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}.\nThe /resourcegroups/{resourceGroupName} bit is optional as some resources are scoped at the subscription level\nARMID is mutually exclusive with Group, Kind, Namespace and Name.",
+              "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+              "type": "string"
+            },
+            "group": {
+              "description": "Group is the Kubernetes group of the resource.",
+              "type": "string"
+            },
+            "kind": {
+              "description": "Kind is the Kubernetes kind of the resource.",
+              "type": "string"
+            },
+            "name": {
+              "description": "Name is the Kubernetes name of the resource.",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "tags": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Tags: Resource tags.",
+      "type": "object"
+    },
+    "workloadType": {
+      "description": "WorkloadType: WorkloadType of the NetworkInterface for BareMetal resources",
+      "type": "string"
+    }
+  },
+  "required": [
+    "owner"
+  ],
+  "title": "Azure Network NetworkInterface",
+  "type": "object"
+}

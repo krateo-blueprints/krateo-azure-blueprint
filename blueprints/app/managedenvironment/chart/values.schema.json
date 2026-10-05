@@ -1,0 +1,461 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "description": "Provision an Azure App ManagedEnvironment via Azure Service Operator. Fields mirror the app.azure.com/v1api20250101 ManagedEnvironment spec.",
+  "properties": {
+    "appLogsConfiguration": {
+      "description": "AppLogsConfiguration: Cluster configuration which enables the log daemon to export app logs to configured destination.",
+      "properties": {
+        "destination": {
+          "description": "Destination: Logs destination, can be 'log-analytics', 'azure-monitor' or 'none'",
+          "type": "string"
+        },
+        "logAnalyticsConfiguration": {
+          "description": "LogAnalyticsConfiguration: Log Analytics configuration, must only be provided when destination is configured as\n'log-analytics'",
+          "properties": {
+            "customerId": {
+              "description": "CustomerId: Log analytics customer id",
+              "type": "string"
+            },
+            "sharedKey": {
+              "description": "SharedKey: Log analytics customer key",
+              "properties": {
+                "key": {
+                  "description": "Key is the key in the Kubernetes secret being referenced",
+                  "type": "string"
+                },
+                "name": {
+                  "description": "Name is the name of the Kubernetes secret being referenced.\nThe secret must be in the same namespace as the resource",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "key",
+                "name"
+              ],
+              "type": "object"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "azureName": {
+      "description": "AzureName: The name of the resource in Azure. This is often the same as the name of the resource in Kubernetes but it\ndoesn't have to be.",
+      "type": "string"
+    },
+    "credentialFrom": {
+      "default": "",
+      "description": "Name of a Kubernetes Secret holding the Azure credential to use for this resource. Rendered as the serviceoperator.azure.com/credential-from annotation. Leave empty to inherit the credential from the namespace, then from the operator's global credential. The resource's subscription and resource group come from spec.owner, not from this field.",
+      "title": "Azure credential Secret",
+      "type": "string"
+    },
+    "customDomainConfiguration": {
+      "description": "CustomDomainConfiguration: Custom domain configuration for the environment",
+      "properties": {
+        "certificateKeyVaultProperties": {
+          "description": "CertificateKeyVaultProperties: Certificate stored in Azure Key Vault.",
+          "properties": {
+            "identityReference": {
+              "description": "IdentityReference: Resource ID of a managed identity to authenticate with Azure Key Vault, or System to use a\nsystem-assigned identity.",
+              "properties": {
+                "armId": {
+                  "description": "ARMID is a string of the form /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}.\nThe /resourcegroups/{resourceGroupName} bit is optional as some resources are scoped at the subscription level\nARMID is mutually exclusive with Group, Kind, Namespace and Name.",
+                  "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+                  "type": "string"
+                },
+                "group": {
+                  "description": "Group is the Kubernetes group of the resource.",
+                  "type": "string"
+                },
+                "kind": {
+                  "description": "Kind is the Kubernetes kind of the resource.",
+                  "type": "string"
+                },
+                "name": {
+                  "description": "Name is the Kubernetes name of the resource.",
+                  "type": "string"
+                },
+                "wellKnownName": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "keyVaultUrl": {
+              "description": "KeyVaultUrl: URL pointing to the Azure Key Vault secret that holds the certificate.",
+              "pattern": "^[a-zA-Z][a-zA-Z0-9+-.]*:[^\\s]*$",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "certificatePassword": {
+          "description": "CertificatePassword: Certificate password",
+          "properties": {
+            "key": {
+              "description": "Key is the key in the Kubernetes secret being referenced",
+              "type": "string"
+            },
+            "name": {
+              "description": "Name is the name of the Kubernetes secret being referenced.\nThe secret must be in the same namespace as the resource",
+              "type": "string"
+            }
+          },
+          "required": [
+            "key",
+            "name"
+          ],
+          "type": "object"
+        },
+        "certificateValue": {
+          "description": "CertificateValue: PFX or PEM blob",
+          "properties": {
+            "key": {
+              "description": "Key is the key in the Kubernetes secret being referenced",
+              "type": "string"
+            },
+            "name": {
+              "description": "Name is the name of the Kubernetes secret being referenced.\nThe secret must be in the same namespace as the resource",
+              "type": "string"
+            }
+          },
+          "required": [
+            "key",
+            "name"
+          ],
+          "type": "object"
+        },
+        "dnsSuffix": {
+          "description": "DnsSuffix: Dns suffix for the environment domain",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "daprAIConnectionString": {
+      "description": "DaprAIConnectionString: Application Insights connection string used by Dapr to export Service to Service communication\ntelemetry",
+      "properties": {
+        "key": {
+          "description": "Key is the key in the Kubernetes secret being referenced",
+          "type": "string"
+        },
+        "name": {
+          "description": "Name is the name of the Kubernetes secret being referenced.\nThe secret must be in the same namespace as the resource",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key",
+        "name"
+      ],
+      "type": "object"
+    },
+    "daprAIInstrumentationKey": {
+      "description": "DaprAIInstrumentationKey: Azure Monitor instrumentation key used by Dapr to export Service to Service communication\ntelemetry",
+      "properties": {
+        "key": {
+          "description": "Key is the key in the Kubernetes secret being referenced",
+          "type": "string"
+        },
+        "name": {
+          "description": "Name is the name of the Kubernetes secret being referenced.\nThe secret must be in the same namespace as the resource",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key",
+        "name"
+      ],
+      "type": "object"
+    },
+    "identity": {
+      "description": "Identity: Managed identities for the Managed Environment to interact with other Azure services without maintaining any\nsecrets or credentials in code.",
+      "properties": {
+        "type": {
+          "description": "Type: Type of managed service identity (where both SystemAssigned and UserAssigned types are allowed).",
+          "enum": [
+            "None",
+            "SystemAssigned",
+            "SystemAssigned,UserAssigned",
+            "UserAssigned"
+          ],
+          "type": "string"
+        },
+        "userAssignedIdentities": {
+          "description": "UserAssignedIdentities: The set of user assigned identities associated with the resource. The userAssignedIdentities\ndictionary keys will be ARM resource ids in the form:\n'/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{identityName}.\nThe dictionary values can be empty objects ({}) in requests.",
+          "items": {
+            "description": "Information about the user assigned identity for the resource",
+            "properties": {
+              "reference": {
+                "description": "ResourceReference represents a resource reference, either to a Kubernetes resource or directly to an Azure resource via ARMID",
+                "properties": {
+                  "armId": {
+                    "description": "ARMID is a string of the form /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}.\nThe /resourcegroups/{resourceGroupName} bit is optional as some resources are scoped at the subscription level\nARMID is mutually exclusive with Group, Kind, Namespace and Name.",
+                    "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+                    "type": "string"
+                  },
+                  "group": {
+                    "description": "Group is the Kubernetes group of the resource.",
+                    "type": "string"
+                  },
+                  "kind": {
+                    "description": "Kind is the Kubernetes kind of the resource.",
+                    "type": "string"
+                  },
+                  "name": {
+                    "description": "Name is the Kubernetes name of the resource.",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "type": "object"
+    },
+    "infrastructureResourceGroup": {
+      "description": "InfrastructureResourceGroup: Name of the platform-managed resource group created for the Managed Environment to host\ninfrastructure resources. If a subnet ID is provided, this resource group will be created in the same subscription as\nthe subnet.",
+      "type": "string"
+    },
+    "kind": {
+      "description": "Kind: Kind of the Environment.",
+      "type": "string"
+    },
+    "location": {
+      "description": "Location: The geo-location where the resource lives",
+      "type": "string"
+    },
+    "operatorSpec": {
+      "description": "OperatorSpec: The specification for configuring operator behavior. This field is interpreted by the operator and not\npassed directly to Azure",
+      "properties": {
+        "configMapExpressions": {
+          "description": "ConfigMapExpressions: configures where to place operator written dynamic ConfigMaps (created with CEL expressions).",
+          "items": {
+            "description": "DestinationExpression is a CEL expression and a destination to store the result in. The destination may\nbe a secret or a configmap. The value of the expression is stored at the specified location in\nthe destination.",
+            "properties": {
+              "annotations": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Annotations is an optional set of annotations to apply to the destination resource.",
+                "type": "object"
+              },
+              "key": {
+                "description": "Key is the key in the ConfigMap or Secret being written to. If the CEL expression in Value returns a string\nthis is required to identify what key to write to. If the CEL expression in Value returns a map[string]string\nKey must not be set, instead the keys written will be determined dynamically based on the keys of the resulting\nmap[string]string.",
+                "type": "string"
+              },
+              "labels": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Labels is an optional set of labels to apply to the destination resource.",
+                "type": "object"
+              },
+              "name": {
+                "description": "Name is the name of the Kubernetes configmap or secret to write to.\nThe configmap or secret will be created in the same namespace as the resource.",
+                "type": "string"
+              },
+              "value": {
+                "description": "Value is a CEL expression. The CEL expression may return a string or a map[string]string. For more information\non CEL in ASO see https://azure.github.io/azure-service-operator/guide/expressions/",
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "value"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "secretExpressions": {
+          "description": "SecretExpressions: configures where to place operator written dynamic secrets (created with CEL expressions).",
+          "items": {
+            "description": "DestinationExpression is a CEL expression and a destination to store the result in. The destination may\nbe a secret or a configmap. The value of the expression is stored at the specified location in\nthe destination.",
+            "properties": {
+              "annotations": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Annotations is an optional set of annotations to apply to the destination resource.",
+                "type": "object"
+              },
+              "key": {
+                "description": "Key is the key in the ConfigMap or Secret being written to. If the CEL expression in Value returns a string\nthis is required to identify what key to write to. If the CEL expression in Value returns a map[string]string\nKey must not be set, instead the keys written will be determined dynamically based on the keys of the resulting\nmap[string]string.",
+                "type": "string"
+              },
+              "labels": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Labels is an optional set of labels to apply to the destination resource.",
+                "type": "object"
+              },
+              "name": {
+                "description": "Name is the name of the Kubernetes configmap or secret to write to.\nThe configmap or secret will be created in the same namespace as the resource.",
+                "type": "string"
+              },
+              "value": {
+                "description": "Value is a CEL expression. The CEL expression may return a string or a map[string]string. For more information\non CEL in ASO see https://azure.github.io/azure-service-operator/guide/expressions/",
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "value"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "owner": {
+      "description": "Owner: The owner of the resource. The owner controls where the resource goes when it is deployed. The owner also\ncontrols the resources lifecycle. When the owner is deleted the resource will also be deleted. Owner is expected to be a\nreference to a resources.azure.com/ResourceGroup resource",
+      "properties": {
+        "armId": {
+          "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+          "type": "string"
+        },
+        "name": {
+          "description": "This is the name of the Kubernetes resource to reference.",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "peerAuthentication": {
+      "description": "PeerAuthentication: Peer authentication settings for the Managed Environment",
+      "properties": {
+        "mtls": {
+          "description": "Mtls: Mutual TLS authentication settings for the Managed Environment",
+          "properties": {
+            "enabled": {
+              "description": "Enabled: Boolean indicating whether the mutual TLS authentication is enabled",
+              "type": "boolean"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "peerTrafficConfiguration": {
+      "description": "PeerTrafficConfiguration: Peer traffic settings for the Managed Environment",
+      "properties": {
+        "encryption": {
+          "description": "Encryption: Peer traffic encryption settings for the Managed Environment",
+          "properties": {
+            "enabled": {
+              "description": "Enabled: Boolean indicating whether the peer traffic encryption is enabled",
+              "type": "boolean"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "tags": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Tags: Resource tags.",
+      "type": "object"
+    },
+    "vnetConfiguration": {
+      "description": "VnetConfiguration: Vnet configuration for the environment",
+      "properties": {
+        "dockerBridgeCidr": {
+          "description": "DockerBridgeCidr: CIDR notation IP range assigned to the Docker bridge, network. Must not overlap with any other\nprovided IP ranges.",
+          "type": "string"
+        },
+        "infrastructureSubnetReference": {
+          "description": "InfrastructureSubnetReference: Resource ID of a subnet for infrastructure components. Must not overlap with any other\nprovided IP ranges.",
+          "properties": {
+            "armId": {
+              "description": "ARMID is a string of the form /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}.\nThe /resourcegroups/{resourceGroupName} bit is optional as some resources are scoped at the subscription level\nARMID is mutually exclusive with Group, Kind, Namespace and Name.",
+              "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+              "type": "string"
+            },
+            "group": {
+              "description": "Group is the Kubernetes group of the resource.",
+              "type": "string"
+            },
+            "kind": {
+              "description": "Kind is the Kubernetes kind of the resource.",
+              "type": "string"
+            },
+            "name": {
+              "description": "Name is the Kubernetes name of the resource.",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "internal": {
+          "description": "Internal: Boolean indicating the environment only has an internal load balancer. These environments do not have a public\nstatic IP resource. They must provide infrastructureSubnetId if enabling this property",
+          "type": "boolean"
+        },
+        "platformReservedCidr": {
+          "description": "PlatformReservedCidr: IP range in CIDR notation that can be reserved for environment infrastructure IP addresses. Must\nnot overlap with any other provided IP ranges.",
+          "type": "string"
+        },
+        "platformReservedDnsIP": {
+          "description": "PlatformReservedDnsIP:  An IP address from the IP range defined by platformReservedCidr that will be reserved for the\ninternal DNS server.",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "workloadProfiles": {
+      "description": "WorkloadProfiles: Workload profiles configured for the Managed Environment.",
+      "items": {
+        "description": "Workload profile to scope container app execution.",
+        "properties": {
+          "maximumCount": {
+            "description": "MaximumCount: The maximum capacity.",
+            "type": "integer"
+          },
+          "minimumCount": {
+            "description": "MinimumCount: The minimum capacity.",
+            "type": "integer"
+          },
+          "name": {
+            "description": "Name: Workload profile type for the workloads to run on.",
+            "type": "string"
+          },
+          "workloadProfileType": {
+            "description": "WorkloadProfileType: Workload profile type for the workloads to run on.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "workloadProfileType"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "zoneRedundant": {
+      "description": "ZoneRedundant: Whether or not this Managed Environment is zone-redundant.",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "location",
+    "owner"
+  ],
+  "title": "Azure App ManagedEnvironment",
+  "type": "object"
+}

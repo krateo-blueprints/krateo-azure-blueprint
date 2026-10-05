@@ -1,0 +1,372 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "description": "Provision an Azure Eventgrid Topic via Azure Service Operator. Fields mirror the eventgrid.azure.com/v1api20200601 Topic spec.",
+  "properties": {
+    "azureName": {
+      "description": "AzureName: The name of the resource in Azure. This is often the same as the name of the resource in Kubernetes but it\ndoesn't have to be.",
+      "type": "string"
+    },
+    "credentialFrom": {
+      "default": "",
+      "description": "Name of a Kubernetes Secret holding the Azure credential to use for this resource. Rendered as the serviceoperator.azure.com/credential-from annotation. Leave empty to inherit the credential from the namespace, then from the operator's global credential. The resource's subscription and resource group come from spec.owner, not from this field.",
+      "title": "Azure credential Secret",
+      "type": "string"
+    },
+    "inboundIpRules": {
+      "description": "InboundIpRules: This can be used to restrict traffic from specific IPs instead of all IPs. Note: These are considered\nonly if PublicNetworkAccess is enabled.",
+      "items": {
+        "properties": {
+          "action": {
+            "description": "Action: Action to perform based on the match or no match of the IpMask.",
+            "enum": [
+              "Allow"
+            ],
+            "type": "string"
+          },
+          "ipMask": {
+            "description": "IpMask: IP Address in CIDR notation e.g., 10.0.0.0/8.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "inputSchema": {
+      "description": "InputSchema: This determines the format that Event Grid should expect for incoming events published to the topic.",
+      "enum": [
+        "CloudEventSchemaV1_0",
+        "CustomEventSchema",
+        "EventGridSchema"
+      ],
+      "type": "string"
+    },
+    "inputSchemaMapping": {
+      "description": "InputSchemaMapping: This enables publishing using custom event schemas. An InputSchemaMapping can be specified to map\nvarious properties of a source schema to various required properties of the EventGridEvent schema.",
+      "properties": {
+        "json": {
+          "description": "Json: Mutually exclusive with all other properties",
+          "properties": {
+            "dataVersion": {
+              "description": "DataVersion: The mapping information for the DataVersion property of the Event Grid Event.",
+              "properties": {
+                "defaultValue": {
+                  "description": "DefaultValue: The default value to be used for mapping when a SourceField is not provided or if there's no property with\nthe specified name in the published JSON event payload.",
+                  "type": "string"
+                },
+                "sourceField": {
+                  "description": "SourceField: Name of a field in the input event schema that's to be used as the source of a mapping.",
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "eventTime": {
+              "description": "EventTime: The mapping information for the EventTime property of the Event Grid Event.",
+              "properties": {
+                "sourceField": {
+                  "description": "SourceField: Name of a field in the input event schema that's to be used as the source of a mapping.",
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "eventType": {
+              "description": "EventType: The mapping information for the EventType property of the Event Grid Event.",
+              "properties": {
+                "defaultValue": {
+                  "description": "DefaultValue: The default value to be used for mapping when a SourceField is not provided or if there's no property with\nthe specified name in the published JSON event payload.",
+                  "type": "string"
+                },
+                "sourceField": {
+                  "description": "SourceField: Name of a field in the input event schema that's to be used as the source of a mapping.",
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "id": {
+              "description": "Id: The mapping information for the Id property of the Event Grid Event.",
+              "properties": {
+                "sourceField": {
+                  "description": "SourceField: Name of a field in the input event schema that's to be used as the source of a mapping.",
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "inputSchemaMappingType": {
+              "description": "InputSchemaMappingType: Type of the custom mapping",
+              "enum": [
+                "Json"
+              ],
+              "type": "string"
+            },
+            "subject": {
+              "description": "Subject: The mapping information for the Subject property of the Event Grid Event.",
+              "properties": {
+                "defaultValue": {
+                  "description": "DefaultValue: The default value to be used for mapping when a SourceField is not provided or if there's no property with\nthe specified name in the published JSON event payload.",
+                  "type": "string"
+                },
+                "sourceField": {
+                  "description": "SourceField: Name of a field in the input event schema that's to be used as the source of a mapping.",
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "topic": {
+              "description": "Topic: The mapping information for the Topic property of the Event Grid Event.",
+              "properties": {
+                "sourceField": {
+                  "description": "SourceField: Name of a field in the input event schema that's to be used as the source of a mapping.",
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "required": [
+            "inputSchemaMappingType"
+          ],
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "location": {
+      "description": "Location: Location of the resource.",
+      "type": "string"
+    },
+    "operatorSpec": {
+      "description": "OperatorSpec: The specification for configuring operator behavior. This field is interpreted by the operator and not\npassed directly to Azure",
+      "properties": {
+        "configMapExpressions": {
+          "description": "ConfigMapExpressions: configures where to place operator written dynamic ConfigMaps (created with CEL expressions).",
+          "items": {
+            "description": "DestinationExpression is a CEL expression and a destination to store the result in. The destination may\nbe a secret or a configmap. The value of the expression is stored at the specified location in\nthe destination.",
+            "properties": {
+              "annotations": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Annotations is an optional set of annotations to apply to the destination resource.",
+                "type": "object"
+              },
+              "key": {
+                "description": "Key is the key in the ConfigMap or Secret being written to. If the CEL expression in Value returns a string\nthis is required to identify what key to write to. If the CEL expression in Value returns a map[string]string\nKey must not be set, instead the keys written will be determined dynamically based on the keys of the resulting\nmap[string]string.",
+                "type": "string"
+              },
+              "labels": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Labels is an optional set of labels to apply to the destination resource.",
+                "type": "object"
+              },
+              "name": {
+                "description": "Name is the name of the Kubernetes configmap or secret to write to.\nThe configmap or secret will be created in the same namespace as the resource.",
+                "type": "string"
+              },
+              "value": {
+                "description": "Value is a CEL expression. The CEL expression may return a string or a map[string]string. For more information\non CEL in ASO see https://azure.github.io/azure-service-operator/guide/expressions/",
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "value"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "configMaps": {
+          "description": "ConfigMaps: configures where to place operator written ConfigMaps.",
+          "properties": {
+            "endpoint": {
+              "description": "Endpoint: indicates where the Endpoint config map should be placed. If omitted, no config map will be created.",
+              "properties": {
+                "annotations": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "description": "Annotations is an optional set of annotations to apply to the ConfigMap.",
+                  "type": "object"
+                },
+                "key": {
+                  "description": "Key is the key in the ConfigMap being referenced",
+                  "type": "string"
+                },
+                "labels": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "description": "Labels is an optional set of labels to apply to the ConfigMap.",
+                  "type": "object"
+                },
+                "name": {
+                  "description": "Name is the name of the Kubernetes ConfigMap to write to.\nThe ConfigMap will be created in the same namespace as the resource.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "key",
+                "name"
+              ],
+              "type": "object"
+            }
+          },
+          "type": "object"
+        },
+        "secretExpressions": {
+          "description": "SecretExpressions: configures where to place operator written dynamic secrets (created with CEL expressions).",
+          "items": {
+            "description": "DestinationExpression is a CEL expression and a destination to store the result in. The destination may\nbe a secret or a configmap. The value of the expression is stored at the specified location in\nthe destination.",
+            "properties": {
+              "annotations": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Annotations is an optional set of annotations to apply to the destination resource.",
+                "type": "object"
+              },
+              "key": {
+                "description": "Key is the key in the ConfigMap or Secret being written to. If the CEL expression in Value returns a string\nthis is required to identify what key to write to. If the CEL expression in Value returns a map[string]string\nKey must not be set, instead the keys written will be determined dynamically based on the keys of the resulting\nmap[string]string.",
+                "type": "string"
+              },
+              "labels": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Labels is an optional set of labels to apply to the destination resource.",
+                "type": "object"
+              },
+              "name": {
+                "description": "Name is the name of the Kubernetes configmap or secret to write to.\nThe configmap or secret will be created in the same namespace as the resource.",
+                "type": "string"
+              },
+              "value": {
+                "description": "Value is a CEL expression. The CEL expression may return a string or a map[string]string. For more information\non CEL in ASO see https://azure.github.io/azure-service-operator/guide/expressions/",
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "value"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "secrets": {
+          "description": "Secrets: configures where to place Azure generated secrets.",
+          "properties": {
+            "key1": {
+              "description": "Key1: indicates where the Key1 secret should be placed. If omitted, the secret will not be retrieved from Azure.",
+              "properties": {
+                "annotations": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "description": "Annotations is an optional set of annotations to apply to the secret.",
+                  "type": "object"
+                },
+                "key": {
+                  "description": "Key is the key in the Kubernetes secret being referenced.",
+                  "type": "string"
+                },
+                "labels": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "description": "Labels is an optional set of labels to apply to the secret.",
+                  "type": "object"
+                },
+                "name": {
+                  "description": "Name is the name of the Kubernetes secret to write to.\nThe secret will be created in the same namespace as the resource.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "key",
+                "name"
+              ],
+              "type": "object"
+            },
+            "key2": {
+              "description": "Key2: indicates where the Key2 secret should be placed. If omitted, the secret will not be retrieved from Azure.",
+              "properties": {
+                "annotations": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "description": "Annotations is an optional set of annotations to apply to the secret.",
+                  "type": "object"
+                },
+                "key": {
+                  "description": "Key is the key in the Kubernetes secret being referenced.",
+                  "type": "string"
+                },
+                "labels": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "description": "Labels is an optional set of labels to apply to the secret.",
+                  "type": "object"
+                },
+                "name": {
+                  "description": "Name is the name of the Kubernetes secret to write to.\nThe secret will be created in the same namespace as the resource.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "key",
+                "name"
+              ],
+              "type": "object"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "owner": {
+      "description": "Owner: The owner of the resource. The owner controls where the resource goes when it is deployed. The owner also\ncontrols the resources lifecycle. When the owner is deleted the resource will also be deleted. Owner is expected to be a\nreference to a resources.azure.com/ResourceGroup resource",
+      "properties": {
+        "armId": {
+          "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+          "type": "string"
+        },
+        "name": {
+          "description": "This is the name of the Kubernetes resource to reference.",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "publicNetworkAccess": {
+      "description": "PublicNetworkAccess: This determines if traffic is allowed over public network. By default it is enabled.\nYou can further restrict to specific IPs by configuring \u003cseealso\ncref=\"P:Microsoft.Azure.Events.ResourceProvider.Common.Contracts.TopicProperties.InboundIpRules\" /\u003e",
+      "enum": [
+        "Disabled",
+        "Enabled"
+      ],
+      "type": "string"
+    },
+    "tags": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Tags: Tags of the resource.",
+      "type": "object"
+    }
+  },
+  "required": [
+    "location",
+    "owner"
+  ],
+  "title": "Azure Eventgrid Topic",
+  "type": "object"
+}

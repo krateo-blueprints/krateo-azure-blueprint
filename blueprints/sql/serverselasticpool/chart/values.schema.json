@@ -1,0 +1,204 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "description": "Provision an Azure Sql ServersElasticPool via Azure Service Operator. Fields mirror the sql.azure.com/v1api20211101 ServersElasticPool spec.",
+  "properties": {
+    "azureName": {
+      "description": "AzureName: The name of the resource in Azure. This is often the same as the name of the resource in Kubernetes but it\ndoesn't have to be.",
+      "type": "string"
+    },
+    "credentialFrom": {
+      "default": "",
+      "description": "Name of a Kubernetes Secret holding the Azure credential to use for this resource. Rendered as the serviceoperator.azure.com/credential-from annotation. Leave empty to inherit the credential from the namespace, then from the operator's global credential. The resource's subscription and resource group come from spec.owner, not from this field.",
+      "title": "Azure credential Secret",
+      "type": "string"
+    },
+    "highAvailabilityReplicaCount": {
+      "description": "HighAvailabilityReplicaCount: The number of secondary replicas associated with the elastic pool that are used to provide\nhigh availability. Applicable only to Hyperscale elastic pools.",
+      "type": "integer"
+    },
+    "licenseType": {
+      "description": "LicenseType: The license type to apply for this elastic pool.",
+      "enum": [
+        "BasePrice",
+        "LicenseIncluded"
+      ],
+      "type": "string"
+    },
+    "location": {
+      "description": "Location: Resource location.",
+      "type": "string"
+    },
+    "maintenanceConfigurationId": {
+      "description": "MaintenanceConfigurationId: Maintenance configuration id assigned to the elastic pool. This configuration defines the\nperiod when the maintenance updates will will occur.",
+      "type": "string"
+    },
+    "maxSizeBytes": {
+      "description": "MaxSizeBytes: The storage limit for the database elastic pool in bytes.",
+      "type": "integer"
+    },
+    "minCapacity": {
+      "description": "MinCapacity: Minimal capacity that serverless pool will not shrink below, if not paused",
+      "type": "number"
+    },
+    "operatorSpec": {
+      "description": "OperatorSpec: The specification for configuring operator behavior. This field is interpreted by the operator and not\npassed directly to Azure",
+      "properties": {
+        "configMapExpressions": {
+          "description": "ConfigMapExpressions: configures where to place operator written dynamic ConfigMaps (created with CEL expressions).",
+          "items": {
+            "description": "DestinationExpression is a CEL expression and a destination to store the result in. The destination may\nbe a secret or a configmap. The value of the expression is stored at the specified location in\nthe destination.",
+            "properties": {
+              "annotations": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Annotations is an optional set of annotations to apply to the destination resource.",
+                "type": "object"
+              },
+              "key": {
+                "description": "Key is the key in the ConfigMap or Secret being written to. If the CEL expression in Value returns a string\nthis is required to identify what key to write to. If the CEL expression in Value returns a map[string]string\nKey must not be set, instead the keys written will be determined dynamically based on the keys of the resulting\nmap[string]string.",
+                "type": "string"
+              },
+              "labels": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Labels is an optional set of labels to apply to the destination resource.",
+                "type": "object"
+              },
+              "name": {
+                "description": "Name is the name of the Kubernetes configmap or secret to write to.\nThe configmap or secret will be created in the same namespace as the resource.",
+                "type": "string"
+              },
+              "value": {
+                "description": "Value is a CEL expression. The CEL expression may return a string or a map[string]string. For more information\non CEL in ASO see https://azure.github.io/azure-service-operator/guide/expressions/",
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "value"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "secretExpressions": {
+          "description": "SecretExpressions: configures where to place operator written dynamic secrets (created with CEL expressions).",
+          "items": {
+            "description": "DestinationExpression is a CEL expression and a destination to store the result in. The destination may\nbe a secret or a configmap. The value of the expression is stored at the specified location in\nthe destination.",
+            "properties": {
+              "annotations": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Annotations is an optional set of annotations to apply to the destination resource.",
+                "type": "object"
+              },
+              "key": {
+                "description": "Key is the key in the ConfigMap or Secret being written to. If the CEL expression in Value returns a string\nthis is required to identify what key to write to. If the CEL expression in Value returns a map[string]string\nKey must not be set, instead the keys written will be determined dynamically based on the keys of the resulting\nmap[string]string.",
+                "type": "string"
+              },
+              "labels": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Labels is an optional set of labels to apply to the destination resource.",
+                "type": "object"
+              },
+              "name": {
+                "description": "Name is the name of the Kubernetes configmap or secret to write to.\nThe configmap or secret will be created in the same namespace as the resource.",
+                "type": "string"
+              },
+              "value": {
+                "description": "Value is a CEL expression. The CEL expression may return a string or a map[string]string. For more information\non CEL in ASO see https://azure.github.io/azure-service-operator/guide/expressions/",
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "value"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "owner": {
+      "description": "Owner: The owner of the resource. The owner controls where the resource goes when it is deployed. The owner also\ncontrols the resources lifecycle. When the owner is deleted the resource will also be deleted. Owner is expected to be a\nreference to a sql.azure.com/Server resource",
+      "properties": {
+        "armId": {
+          "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+          "type": "string"
+        },
+        "name": {
+          "description": "This is the name of the Kubernetes resource to reference.",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "perDatabaseSettings": {
+      "description": "PerDatabaseSettings: The per database settings for the elastic pool.",
+      "properties": {
+        "maxCapacity": {
+          "description": "MaxCapacity: The maximum capacity any one database can consume.",
+          "type": "number"
+        },
+        "minCapacity": {
+          "description": "MinCapacity: The minimum capacity all databases are guaranteed.",
+          "type": "number"
+        }
+      },
+      "type": "object"
+    },
+    "sku": {
+      "description": "Sku: The elastic pool SKU.\nThe list of SKUs may vary by region and support offer. To determine the SKUs (including the SKU name, tier/edition,\nfamily, and capacity) that are available to your subscription in an Azure region, use the `Capabilities_ListByLocation`\nREST API or the following command:\n```azurecli\naz sql elastic-pool list-editions -l \u003clocation\u003e -o table\n````",
+      "properties": {
+        "capacity": {
+          "description": "Capacity: Capacity of the particular SKU.",
+          "type": "integer"
+        },
+        "family": {
+          "description": "Family: If the service has different generations of hardware, for the same SKU, then that can be captured here.",
+          "type": "string"
+        },
+        "name": {
+          "description": "Name: The name of the SKU, typically, a letter + Number code, e.g. P3.",
+          "type": "string"
+        },
+        "size": {
+          "description": "Size: Size of the particular SKU",
+          "type": "string"
+        },
+        "tier": {
+          "description": "Tier: The tier or edition of the particular SKU, e.g. Basic, Premium.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "type": "object"
+    },
+    "tags": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Tags: Resource tags.",
+      "type": "object"
+    },
+    "zoneRedundant": {
+      "description": "ZoneRedundant: Whether or not this elastic pool is zone redundant, which means the replicas of this elastic pool will be\nspread across multiple availability zones.",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "location",
+    "owner"
+  ],
+  "title": "Azure Sql ServersElasticPool",
+  "type": "object"
+}

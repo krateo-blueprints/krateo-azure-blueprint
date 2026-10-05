@@ -1,0 +1,315 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "description": "Provision an Azure Network NetworkWatchersFlowLog via Azure Service Operator. Fields mirror the network.azure.com/v1api20241001 NetworkWatchersFlowLog spec.",
+  "properties": {
+    "azureName": {
+      "description": "AzureName: The name of the resource in Azure. This is often the same as the name of the resource in Kubernetes but it\ndoesn't have to be.",
+      "type": "string"
+    },
+    "credentialFrom": {
+      "default": "",
+      "description": "Name of a Kubernetes Secret holding the Azure credential to use for this resource. Rendered as the serviceoperator.azure.com/credential-from annotation. Leave empty to inherit the credential from the namespace, then from the operator's global credential. The resource's subscription and resource group come from spec.owner, not from this field.",
+      "title": "Azure credential Secret",
+      "type": "string"
+    },
+    "enabled": {
+      "description": "Enabled: Flag to enable/disable flow logging.",
+      "type": "boolean"
+    },
+    "enabledFilteringCriteria": {
+      "description": "EnabledFilteringCriteria: Optional field to filter network traffic logs based on SrcIP, SrcPort, DstIP, DstPort,\nProtocol, Encryption, Direction and Action. If not specified, all network traffic will be logged.",
+      "type": "string"
+    },
+    "flowAnalyticsConfiguration": {
+      "description": "FlowAnalyticsConfiguration: Parameters that define the configuration of traffic analytics.",
+      "properties": {
+        "networkWatcherFlowAnalyticsConfiguration": {
+          "description": "NetworkWatcherFlowAnalyticsConfiguration: Parameters that define the configuration of traffic analytics.",
+          "properties": {
+            "enabled": {
+              "description": "Enabled: Flag to enable/disable traffic analytics.",
+              "type": "boolean"
+            },
+            "trafficAnalyticsInterval": {
+              "description": "TrafficAnalyticsInterval: The interval in minutes which would decide how frequently TA service should do flow analytics.",
+              "type": "integer"
+            },
+            "workspaceRegion": {
+              "description": "WorkspaceRegion: The location of the attached workspace.",
+              "type": "string"
+            },
+            "workspaceResourceReference": {
+              "description": "WorkspaceResourceReference: Resource Id of the attached workspace.",
+              "properties": {
+                "armId": {
+                  "description": "ARMID is a string of the form /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}.\nThe /resourcegroups/{resourceGroupName} bit is optional as some resources are scoped at the subscription level\nARMID is mutually exclusive with Group, Kind, Namespace and Name.",
+                  "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+                  "type": "string"
+                },
+                "group": {
+                  "description": "Group is the Kubernetes group of the resource.",
+                  "type": "string"
+                },
+                "kind": {
+                  "description": "Kind is the Kubernetes kind of the resource.",
+                  "type": "string"
+                },
+                "name": {
+                  "description": "Name is the Kubernetes name of the resource.",
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "format": {
+      "description": "Format: Parameters that define the flow log format.",
+      "properties": {
+        "type": {
+          "description": "Type: The file type of flow log.",
+          "enum": [
+            "JSON"
+          ],
+          "type": "string"
+        },
+        "version": {
+          "description": "Version: The version (revision) of the flow log.",
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "identity": {
+      "description": "Identity: FlowLog resource Managed Identity",
+      "properties": {
+        "type": {
+          "description": "Type: The type of identity used for the resource. The type 'SystemAssigned, UserAssigned' includes both an implicitly\ncreated identity and a set of user assigned identities. The type 'None' will remove any identities from the virtual\nmachine.",
+          "enum": [
+            "None",
+            "SystemAssigned",
+            "SystemAssigned, UserAssigned",
+            "UserAssigned"
+          ],
+          "type": "string"
+        },
+        "userAssignedIdentities": {
+          "description": "UserAssignedIdentities: The list of user identities associated with resource. The user identity dictionary key\nreferences will be ARM resource ids in the form:\n'/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{identityName}'.",
+          "items": {
+            "description": "Information about the user assigned identity for the resource",
+            "properties": {
+              "reference": {
+                "description": "ResourceReference represents a resource reference, either to a Kubernetes resource or directly to an Azure resource via ARMID",
+                "properties": {
+                  "armId": {
+                    "description": "ARMID is a string of the form /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}.\nThe /resourcegroups/{resourceGroupName} bit is optional as some resources are scoped at the subscription level\nARMID is mutually exclusive with Group, Kind, Namespace and Name.",
+                    "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+                    "type": "string"
+                  },
+                  "group": {
+                    "description": "Group is the Kubernetes group of the resource.",
+                    "type": "string"
+                  },
+                  "kind": {
+                    "description": "Kind is the Kubernetes kind of the resource.",
+                    "type": "string"
+                  },
+                  "name": {
+                    "description": "Name is the Kubernetes name of the resource.",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "location": {
+      "description": "Location: Resource location.",
+      "type": "string"
+    },
+    "operatorSpec": {
+      "description": "OperatorSpec: The specification for configuring operator behavior. This field is interpreted by the operator and not\npassed directly to Azure",
+      "properties": {
+        "configMapExpressions": {
+          "description": "ConfigMapExpressions: configures where to place operator written dynamic ConfigMaps (created with CEL expressions).",
+          "items": {
+            "description": "DestinationExpression is a CEL expression and a destination to store the result in. The destination may\nbe a secret or a configmap. The value of the expression is stored at the specified location in\nthe destination.",
+            "properties": {
+              "annotations": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Annotations is an optional set of annotations to apply to the destination resource.",
+                "type": "object"
+              },
+              "key": {
+                "description": "Key is the key in the ConfigMap or Secret being written to. If the CEL expression in Value returns a string\nthis is required to identify what key to write to. If the CEL expression in Value returns a map[string]string\nKey must not be set, instead the keys written will be determined dynamically based on the keys of the resulting\nmap[string]string.",
+                "type": "string"
+              },
+              "labels": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Labels is an optional set of labels to apply to the destination resource.",
+                "type": "object"
+              },
+              "name": {
+                "description": "Name is the name of the Kubernetes configmap or secret to write to.\nThe configmap or secret will be created in the same namespace as the resource.",
+                "type": "string"
+              },
+              "value": {
+                "description": "Value is a CEL expression. The CEL expression may return a string or a map[string]string. For more information\non CEL in ASO see https://azure.github.io/azure-service-operator/guide/expressions/",
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "value"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "secretExpressions": {
+          "description": "SecretExpressions: configures where to place operator written dynamic secrets (created with CEL expressions).",
+          "items": {
+            "description": "DestinationExpression is a CEL expression and a destination to store the result in. The destination may\nbe a secret or a configmap. The value of the expression is stored at the specified location in\nthe destination.",
+            "properties": {
+              "annotations": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Annotations is an optional set of annotations to apply to the destination resource.",
+                "type": "object"
+              },
+              "key": {
+                "description": "Key is the key in the ConfigMap or Secret being written to. If the CEL expression in Value returns a string\nthis is required to identify what key to write to. If the CEL expression in Value returns a map[string]string\nKey must not be set, instead the keys written will be determined dynamically based on the keys of the resulting\nmap[string]string.",
+                "type": "string"
+              },
+              "labels": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Labels is an optional set of labels to apply to the destination resource.",
+                "type": "object"
+              },
+              "name": {
+                "description": "Name is the name of the Kubernetes configmap or secret to write to.\nThe configmap or secret will be created in the same namespace as the resource.",
+                "type": "string"
+              },
+              "value": {
+                "description": "Value is a CEL expression. The CEL expression may return a string or a map[string]string. For more information\non CEL in ASO see https://azure.github.io/azure-service-operator/guide/expressions/",
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "value"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "owner": {
+      "description": "Owner: The owner of the resource. The owner controls where the resource goes when it is deployed. The owner also\ncontrols the resources lifecycle. When the owner is deleted the resource will also be deleted. Owner is expected to be a\nreference to a network.azure.com/NetworkWatcher resource",
+      "properties": {
+        "armId": {
+          "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+          "type": "string"
+        },
+        "name": {
+          "description": "This is the name of the Kubernetes resource to reference.",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "retentionPolicy": {
+      "description": "RetentionPolicy: Parameters that define the retention policy for flow log.",
+      "properties": {
+        "days": {
+          "description": "Days: Number of days to retain flow log records.",
+          "type": "integer"
+        },
+        "enabled": {
+          "description": "Enabled: Flag to enable/disable retention.",
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "storageReference": {
+      "description": "StorageReference: ID of the storage account which is used to store the flow log.",
+      "properties": {
+        "armId": {
+          "description": "ARMID is a string of the form /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}.\nThe /resourcegroups/{resourceGroupName} bit is optional as some resources are scoped at the subscription level\nARMID is mutually exclusive with Group, Kind, Namespace and Name.",
+          "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+          "type": "string"
+        },
+        "group": {
+          "description": "Group is the Kubernetes group of the resource.",
+          "type": "string"
+        },
+        "kind": {
+          "description": "Kind is the Kubernetes kind of the resource.",
+          "type": "string"
+        },
+        "name": {
+          "description": "Name is the Kubernetes name of the resource.",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "tags": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Tags: Resource tags.",
+      "type": "object"
+    },
+    "targetResourceReference": {
+      "description": "TargetResourceReference: ID of network security group to which flow log will be applied.",
+      "properties": {
+        "armId": {
+          "description": "ARMID is a string of the form /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}.\nThe /resourcegroups/{resourceGroupName} bit is optional as some resources are scoped at the subscription level\nARMID is mutually exclusive with Group, Kind, Namespace and Name.",
+          "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+          "type": "string"
+        },
+        "group": {
+          "description": "Group is the Kubernetes group of the resource.",
+          "type": "string"
+        },
+        "kind": {
+          "description": "Kind is the Kubernetes kind of the resource.",
+          "type": "string"
+        },
+        "name": {
+          "description": "Name is the Kubernetes name of the resource.",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "required": [
+    "owner",
+    "storageReference",
+    "targetResourceReference"
+  ],
+  "title": "Azure Network NetworkWatchersFlowLog",
+  "type": "object"
+}

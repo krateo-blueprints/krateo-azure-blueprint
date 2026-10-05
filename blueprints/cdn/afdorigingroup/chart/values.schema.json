@@ -1,0 +1,187 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "description": "Provision an Azure Cdn AfdOriginGroup via Azure Service Operator. Fields mirror the cdn.azure.com/v1api20230501 AfdOriginGroup spec.",
+  "properties": {
+    "azureName": {
+      "description": "AzureName: The name of the resource in Azure. This is often the same as the name of the resource in Kubernetes but it\ndoesn't have to be.",
+      "type": "string"
+    },
+    "credentialFrom": {
+      "default": "",
+      "description": "Name of a Kubernetes Secret holding the Azure credential to use for this resource. Rendered as the serviceoperator.azure.com/credential-from annotation. Leave empty to inherit the credential from the namespace, then from the operator's global credential. The resource's subscription and resource group come from spec.owner, not from this field.",
+      "title": "Azure credential Secret",
+      "type": "string"
+    },
+    "healthProbeSettings": {
+      "description": "HealthProbeSettings: Health probe settings to the origin that is used to determine the health of the origin.",
+      "properties": {
+        "probeIntervalInSeconds": {
+          "description": "ProbeIntervalInSeconds: The number of seconds between health probes.Default is 240sec.",
+          "maximum": 255,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "probePath": {
+          "description": "ProbePath: The path relative to the origin that is used to determine the health of the origin.",
+          "type": "string"
+        },
+        "probeProtocol": {
+          "description": "ProbeProtocol: Protocol to use for health probe.",
+          "enum": [
+            "Http",
+            "Https",
+            "NotSet"
+          ],
+          "type": "string"
+        },
+        "probeRequestType": {
+          "description": "ProbeRequestType: The type of health probe request that is made.",
+          "enum": [
+            "GET",
+            "HEAD",
+            "NotSet"
+          ],
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "loadBalancingSettings": {
+      "description": "LoadBalancingSettings: Load balancing settings for a backend pool",
+      "properties": {
+        "additionalLatencyInMilliseconds": {
+          "description": "AdditionalLatencyInMilliseconds: The additional latency in milliseconds for probes to fall into the lowest latency bucket",
+          "type": "integer"
+        },
+        "sampleSize": {
+          "description": "SampleSize: The number of samples to consider for load balancing decisions",
+          "type": "integer"
+        },
+        "successfulSamplesRequired": {
+          "description": "SuccessfulSamplesRequired: The number of samples within the sample period that must succeed",
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "operatorSpec": {
+      "description": "OperatorSpec: The specification for configuring operator behavior. This field is interpreted by the operator and not\npassed directly to Azure",
+      "properties": {
+        "configMapExpressions": {
+          "description": "ConfigMapExpressions: configures where to place operator written dynamic ConfigMaps (created with CEL expressions).",
+          "items": {
+            "description": "DestinationExpression is a CEL expression and a destination to store the result in. The destination may\nbe a secret or a configmap. The value of the expression is stored at the specified location in\nthe destination.",
+            "properties": {
+              "annotations": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Annotations is an optional set of annotations to apply to the destination resource.",
+                "type": "object"
+              },
+              "key": {
+                "description": "Key is the key in the ConfigMap or Secret being written to. If the CEL expression in Value returns a string\nthis is required to identify what key to write to. If the CEL expression in Value returns a map[string]string\nKey must not be set, instead the keys written will be determined dynamically based on the keys of the resulting\nmap[string]string.",
+                "type": "string"
+              },
+              "labels": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Labels is an optional set of labels to apply to the destination resource.",
+                "type": "object"
+              },
+              "name": {
+                "description": "Name is the name of the Kubernetes configmap or secret to write to.\nThe configmap or secret will be created in the same namespace as the resource.",
+                "type": "string"
+              },
+              "value": {
+                "description": "Value is a CEL expression. The CEL expression may return a string or a map[string]string. For more information\non CEL in ASO see https://azure.github.io/azure-service-operator/guide/expressions/",
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "value"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "secretExpressions": {
+          "description": "SecretExpressions: configures where to place operator written dynamic secrets (created with CEL expressions).",
+          "items": {
+            "description": "DestinationExpression is a CEL expression and a destination to store the result in. The destination may\nbe a secret or a configmap. The value of the expression is stored at the specified location in\nthe destination.",
+            "properties": {
+              "annotations": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Annotations is an optional set of annotations to apply to the destination resource.",
+                "type": "object"
+              },
+              "key": {
+                "description": "Key is the key in the ConfigMap or Secret being written to. If the CEL expression in Value returns a string\nthis is required to identify what key to write to. If the CEL expression in Value returns a map[string]string\nKey must not be set, instead the keys written will be determined dynamically based on the keys of the resulting\nmap[string]string.",
+                "type": "string"
+              },
+              "labels": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Labels is an optional set of labels to apply to the destination resource.",
+                "type": "object"
+              },
+              "name": {
+                "description": "Name is the name of the Kubernetes configmap or secret to write to.\nThe configmap or secret will be created in the same namespace as the resource.",
+                "type": "string"
+              },
+              "value": {
+                "description": "Value is a CEL expression. The CEL expression may return a string or a map[string]string. For more information\non CEL in ASO see https://azure.github.io/azure-service-operator/guide/expressions/",
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "value"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "owner": {
+      "description": "Owner: The owner of the resource. The owner controls where the resource goes when it is deployed. The owner also\ncontrols the resources lifecycle. When the owner is deleted the resource will also be deleted. Owner is expected to be a\nreference to a cdn.azure.com/Profile resource",
+      "properties": {
+        "armId": {
+          "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+          "type": "string"
+        },
+        "name": {
+          "description": "This is the name of the Kubernetes resource to reference.",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "sessionAffinityState": {
+      "description": "SessionAffinityState: Whether to allow session affinity on this host. Valid options are 'Enabled' or 'Disabled'",
+      "enum": [
+        "Disabled",
+        "Enabled"
+      ],
+      "type": "string"
+    },
+    "trafficRestorationTimeToHealedOrNewEndpointsInMinutes": {
+      "description": "TrafficRestorationTimeToHealedOrNewEndpointsInMinutes: Time in minutes to shift the traffic to the endpoint gradually\nwhen an unhealthy endpoint comes healthy or a new endpoint is added. Default is 10 mins. This property is currently not\nsupported.",
+      "maximum": 50,
+      "minimum": 0,
+      "type": "integer"
+    }
+  },
+  "required": [
+    "owner"
+  ],
+  "title": "Azure Cdn AfdOriginGroup",
+  "type": "object"
+}

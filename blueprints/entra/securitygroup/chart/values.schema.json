@@ -1,0 +1,96 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "description": "Provision an Azure Entra SecurityGroup via Azure Service Operator. Fields mirror the entra.azure.com/v1 SecurityGroup spec.",
+  "properties": {
+    "credentialFrom": {
+      "default": "",
+      "description": "Name of a Kubernetes Secret holding the Azure credential to use for this resource. Rendered as the serviceoperator.azure.com/credential-from annotation. Leave empty to inherit the credential from the namespace, then from the operator's global credential. The resource's subscription and resource group come from spec.owner, not from this field.",
+      "title": "Azure credential Secret",
+      "type": "string"
+    },
+    "description": {
+      "description": "Description: The description of the group.",
+      "type": "string"
+    },
+    "displayName": {
+      "description": "DisplayName: The display name of the group.",
+      "type": "string"
+    },
+    "isAssignableToRole": {
+      "description": "IsAssignableToRole: Indicates whether the group can be assigned to a role.",
+      "type": "boolean"
+    },
+    "mailNickname": {
+      "description": "MailNickname: The email address of the group, specified either as a mail nickname (`mygroup`)\nor as a full email address (`mygroup@mydomain.com`).",
+      "type": "string"
+    },
+    "membershipType": {
+      "description": "MembershipType: The membership type of the group.",
+      "enum": [
+        "assigned",
+        "enabled",
+        "assignedm365",
+        "enabledm365"
+      ],
+      "type": "string"
+    },
+    "operatorSpec": {
+      "description": "OperatorSpec: The operator specific configuration for the resource.",
+      "properties": {
+        "configmaps": {
+          "description": "ConfigMaps specifies any config maps that should be created by the operator.",
+          "properties": {
+            "entraID": {
+              "description": "EntraID: The Entra ID of the group.",
+              "properties": {
+                "annotations": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "description": "Annotations is an optional set of annotations to apply to the ConfigMap.",
+                  "type": "object"
+                },
+                "key": {
+                  "description": "Key is the key in the ConfigMap being referenced",
+                  "type": "string"
+                },
+                "labels": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "description": "Labels is an optional set of labels to apply to the ConfigMap.",
+                  "type": "object"
+                },
+                "name": {
+                  "description": "Name is the name of the Kubernetes ConfigMap to write to.\nThe ConfigMap will be created in the same namespace as the resource.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "key",
+                "name"
+              ],
+              "type": "object"
+            }
+          },
+          "type": "object"
+        },
+        "creationMode": {
+          "description": "CreationMode: Specifies how ASO will try to create the resource.\nSpecify \"AlwaysCreate\" to always create a new security group when first reconciled.\nOr specify \"AdoptOrCreate\" to first try to adopt an existing security group with the same display name.\nIf multiple security groups with the same display name are found, the resource condition will show an error.\nIf not specified, defaults to \"AdoptOrCreate\".",
+          "enum": [
+            "AdoptOrCreate",
+            "AlwaysCreate"
+          ],
+          "type": "string"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "required": [
+    "displayName",
+    "mailNickname"
+  ],
+  "title": "Azure Entra SecurityGroup",
+  "type": "object"
+}

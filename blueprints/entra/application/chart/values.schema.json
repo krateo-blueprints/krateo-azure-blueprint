@@ -1,0 +1,194 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "description": "Provision an Azure Entra Application via Azure Service Operator. Fields mirror the entra.azure.com/v1 Application spec.",
+  "properties": {
+    "credentialFrom": {
+      "default": "",
+      "description": "Name of a Kubernetes Secret holding the Azure credential to use for this resource. Rendered as the serviceoperator.azure.com/credential-from annotation. Leave empty to inherit the credential from the namespace, then from the operator's global credential. The resource's subscription and resource group come from spec.owner, not from this field.",
+      "title": "Azure credential Secret",
+      "type": "string"
+    },
+    "description": {
+      "description": "Description: The description of the application.",
+      "type": "string"
+    },
+    "displayName": {
+      "description": "DisplayName: The display name of the application.",
+      "type": "string"
+    },
+    "groupMembershipClaims": {
+      "description": "GroupMembershipClaims: Configures the groups claim issued in a user or OAuth 2.0 access token.",
+      "type": "string"
+    },
+    "identifierUris": {
+      "description": "IdentifierUris: The URIs that identify the application within its Azure AD tenant, or within a verified custom domain.",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "isFallbackPublicClient": {
+      "description": "IsFallbackPublicClient: Specifies the fallback application type as public client.",
+      "type": "boolean"
+    },
+    "operatorSpec": {
+      "description": "OperatorSpec: The operator specific configuration for the resource.",
+      "properties": {
+        "configmaps": {
+          "description": "ConfigMaps specifies any config maps that should be created by the operator.",
+          "properties": {
+            "appId": {
+              "description": "AppId: The application (client) ID of the application.",
+              "properties": {
+                "annotations": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "description": "Annotations is an optional set of annotations to apply to the ConfigMap.",
+                  "type": "object"
+                },
+                "key": {
+                  "description": "Key is the key in the ConfigMap being referenced",
+                  "type": "string"
+                },
+                "labels": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "description": "Labels is an optional set of labels to apply to the ConfigMap.",
+                  "type": "object"
+                },
+                "name": {
+                  "description": "Name is the name of the Kubernetes ConfigMap to write to.\nThe ConfigMap will be created in the same namespace as the resource.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "key",
+                "name"
+              ],
+              "type": "object"
+            },
+            "entraID": {
+              "description": "EntraID: The Entra ID (object ID) of the application.",
+              "properties": {
+                "annotations": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "description": "Annotations is an optional set of annotations to apply to the ConfigMap.",
+                  "type": "object"
+                },
+                "key": {
+                  "description": "Key is the key in the ConfigMap being referenced",
+                  "type": "string"
+                },
+                "labels": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "description": "Labels is an optional set of labels to apply to the ConfigMap.",
+                  "type": "object"
+                },
+                "name": {
+                  "description": "Name is the name of the Kubernetes ConfigMap to write to.\nThe ConfigMap will be created in the same namespace as the resource.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "key",
+                "name"
+              ],
+              "type": "object"
+            }
+          },
+          "type": "object"
+        },
+        "creationMode": {
+          "description": "CreationMode: Specifies how ASO will try to create the resource.\nSpecify \"AlwaysCreate\" to always create a new application when first reconciled.\nOr specify \"AdoptOrCreate\" to first try to adopt an existing application with the same display name.\nIf multiple applications with the same display name are found, the resource ready condition will show an error.\nIf not specified, defaults to \"AdoptOrCreate\".",
+          "enum": [
+            "AdoptOrCreate",
+            "AlwaysCreate"
+          ],
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "publicClient": {
+      "description": "PublicClient: Public client (desktop/mobile) platform configuration.",
+      "properties": {
+        "redirectUris": {
+          "description": "RedirectUris: Redirect URIs for public client applications.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "signInAudience": {
+      "description": "SignInAudience: Specifies the Microsoft accounts that are supported for the application.",
+      "enum": [
+        "AzureADMyOrg",
+        "AzureADMultipleOrgs",
+        "AzureADandPersonalMicrosoftAccount",
+        "PersonalMicrosoftAccount"
+      ],
+      "type": "string"
+    },
+    "spa": {
+      "description": "Spa: Single-page application platform configuration.",
+      "properties": {
+        "redirectUris": {
+          "description": "RedirectUris: Redirect URIs for single-page applications.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "tags": {
+      "description": "Tags: Custom strings for categorizing and identifying the application.",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "web": {
+      "description": "Web: Web platform configuration for the application.",
+      "properties": {
+        "implicitGrantSettings": {
+          "description": "ImplicitGrantSettings: Settings for implicit grant flow.",
+          "properties": {
+            "enableAccessTokenIssuance": {
+              "description": "EnableAccessTokenIssuance: Whether to enable access token issuance in the implicit flow.",
+              "type": "boolean"
+            },
+            "enableIdTokenIssuance": {
+              "description": "EnableIdTokenIssuance: Whether to enable ID token issuance in the implicit flow.",
+              "type": "boolean"
+            }
+          },
+          "type": "object"
+        },
+        "redirectUris": {
+          "description": "RedirectUris: Redirect URIs for web applications.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "required": [
+    "displayName"
+  ],
+  "title": "Azure Entra Application",
+  "type": "object"
+}

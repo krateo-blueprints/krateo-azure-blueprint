@@ -1,0 +1,304 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "description": "Provision an Azure Synapse WorkspacesBigDataPool via Azure Service Operator. Fields mirror the synapse.azure.com/v1api20210601 WorkspacesBigDataPool spec.",
+  "properties": {
+    "autoPause": {
+      "description": "AutoPause: Auto-pausing properties",
+      "properties": {
+        "delayInMinutes": {
+          "description": "DelayInMinutes: Number of minutes of idle time before the Big Data pool is automatically paused.",
+          "type": "integer"
+        },
+        "enabled": {
+          "description": "Enabled: Whether auto-pausing is enabled for the Big Data pool.",
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "autoScale": {
+      "description": "AutoScale: Auto-scaling properties",
+      "properties": {
+        "enabled": {
+          "description": "Enabled: Whether automatic scaling is enabled for the Big Data pool.",
+          "type": "boolean"
+        },
+        "maxNodeCount": {
+          "description": "MaxNodeCount: The maximum number of nodes the Big Data pool can support.",
+          "type": "integer"
+        },
+        "minNodeCount": {
+          "description": "MinNodeCount: The minimum number of nodes the Big Data pool can support.",
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "azureName": {
+      "description": "AzureName: The name of the resource in Azure. This is often the same as the name of the resource in Kubernetes but it\ndoesn't have to be.",
+      "type": "string"
+    },
+    "cacheSize": {
+      "description": "CacheSize: The cache size",
+      "type": "integer"
+    },
+    "credentialFrom": {
+      "default": "",
+      "description": "Name of a Kubernetes Secret holding the Azure credential to use for this resource. Rendered as the serviceoperator.azure.com/credential-from annotation. Leave empty to inherit the credential from the namespace, then from the operator's global credential. The resource's subscription and resource group come from spec.owner, not from this field.",
+      "title": "Azure credential Secret",
+      "type": "string"
+    },
+    "customLibraries": {
+      "description": "CustomLibraries: List of custom libraries/packages associated with the spark pool.",
+      "items": {
+        "description": "Library/package information of a Big Data pool powered by Apache Spark",
+        "properties": {
+          "containerName": {
+            "description": "ContainerName: Storage blob container name.",
+            "type": "string"
+          },
+          "name": {
+            "description": "Name: Name of the library.",
+            "type": "string"
+          },
+          "path": {
+            "description": "Path: Storage blob path of library.",
+            "type": "string"
+          },
+          "type": {
+            "description": "Type: Type of the library.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "defaultSparkLogFolder": {
+      "description": "DefaultSparkLogFolder: The default folder where Spark logs will be written.",
+      "type": "string"
+    },
+    "dynamicExecutorAllocation": {
+      "description": "DynamicExecutorAllocation: Dynamic Executor Allocation",
+      "properties": {
+        "enabled": {
+          "description": "Enabled: Indicates whether Dynamic Executor Allocation is enabled or not.",
+          "type": "boolean"
+        },
+        "maxExecutors": {
+          "description": "MaxExecutors: The maximum number of executors alloted",
+          "type": "integer"
+        },
+        "minExecutors": {
+          "description": "MinExecutors: The minimum number of executors alloted",
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "isAutotuneEnabled": {
+      "description": "IsAutotuneEnabled: Whether autotune is required or not.",
+      "type": "boolean"
+    },
+    "isComputeIsolationEnabled": {
+      "description": "IsComputeIsolationEnabled: Whether compute isolation is required or not.",
+      "type": "boolean"
+    },
+    "libraryRequirements": {
+      "description": "LibraryRequirements: Library version requirements",
+      "properties": {
+        "content": {
+          "description": "Content: The library requirements.",
+          "type": "string"
+        },
+        "filename": {
+          "description": "Filename: The filename of the library requirements file.",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "location": {
+      "description": "Location: The geo-location where the resource lives",
+      "type": "string"
+    },
+    "nodeCount": {
+      "description": "NodeCount: The number of nodes in the Big Data pool.",
+      "type": "integer"
+    },
+    "nodeSize": {
+      "description": "NodeSize: The level of compute power that each node in the Big Data pool has.",
+      "enum": [
+        "Large",
+        "Medium",
+        "None",
+        "Small",
+        "XLarge",
+        "XXLarge",
+        "XXXLarge"
+      ],
+      "type": "string"
+    },
+    "nodeSizeFamily": {
+      "description": "NodeSizeFamily: The kind of nodes that the Big Data pool provides.",
+      "enum": [
+        "HardwareAcceleratedFPGA",
+        "HardwareAcceleratedGPU",
+        "MemoryOptimized",
+        "None"
+      ],
+      "type": "string"
+    },
+    "operatorSpec": {
+      "description": "OperatorSpec: The specification for configuring operator behavior. This field is interpreted by the operator and not\npassed directly to Azure",
+      "properties": {
+        "configMapExpressions": {
+          "description": "ConfigMapExpressions: configures where to place operator written dynamic ConfigMaps (created with CEL expressions).",
+          "items": {
+            "description": "DestinationExpression is a CEL expression and a destination to store the result in. The destination may\nbe a secret or a configmap. The value of the expression is stored at the specified location in\nthe destination.",
+            "properties": {
+              "annotations": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Annotations is an optional set of annotations to apply to the destination resource.",
+                "type": "object"
+              },
+              "key": {
+                "description": "Key is the key in the ConfigMap or Secret being written to. If the CEL expression in Value returns a string\nthis is required to identify what key to write to. If the CEL expression in Value returns a map[string]string\nKey must not be set, instead the keys written will be determined dynamically based on the keys of the resulting\nmap[string]string.",
+                "type": "string"
+              },
+              "labels": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Labels is an optional set of labels to apply to the destination resource.",
+                "type": "object"
+              },
+              "name": {
+                "description": "Name is the name of the Kubernetes configmap or secret to write to.\nThe configmap or secret will be created in the same namespace as the resource.",
+                "type": "string"
+              },
+              "value": {
+                "description": "Value is a CEL expression. The CEL expression may return a string or a map[string]string. For more information\non CEL in ASO see https://azure.github.io/azure-service-operator/guide/expressions/",
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "value"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "secretExpressions": {
+          "description": "SecretExpressions: configures where to place operator written dynamic secrets (created with CEL expressions).",
+          "items": {
+            "description": "DestinationExpression is a CEL expression and a destination to store the result in. The destination may\nbe a secret or a configmap. The value of the expression is stored at the specified location in\nthe destination.",
+            "properties": {
+              "annotations": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Annotations is an optional set of annotations to apply to the destination resource.",
+                "type": "object"
+              },
+              "key": {
+                "description": "Key is the key in the ConfigMap or Secret being written to. If the CEL expression in Value returns a string\nthis is required to identify what key to write to. If the CEL expression in Value returns a map[string]string\nKey must not be set, instead the keys written will be determined dynamically based on the keys of the resulting\nmap[string]string.",
+                "type": "string"
+              },
+              "labels": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Labels is an optional set of labels to apply to the destination resource.",
+                "type": "object"
+              },
+              "name": {
+                "description": "Name is the name of the Kubernetes configmap or secret to write to.\nThe configmap or secret will be created in the same namespace as the resource.",
+                "type": "string"
+              },
+              "value": {
+                "description": "Value is a CEL expression. The CEL expression may return a string or a map[string]string. For more information\non CEL in ASO see https://azure.github.io/azure-service-operator/guide/expressions/",
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "value"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "owner": {
+      "description": "Owner: The owner of the resource. The owner controls where the resource goes when it is deployed. The owner also\ncontrols the resources lifecycle. When the owner is deleted the resource will also be deleted. Owner is expected to be a\nreference to a synapse.azure.com/Workspace resource",
+      "properties": {
+        "armId": {
+          "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+          "type": "string"
+        },
+        "name": {
+          "description": "This is the name of the Kubernetes resource to reference.",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "provisioningState": {
+      "description": "ProvisioningState: The state of the Big Data pool.",
+      "type": "string"
+    },
+    "sessionLevelPackagesEnabled": {
+      "description": "SessionLevelPackagesEnabled: Whether session level packages enabled.",
+      "type": "boolean"
+    },
+    "sparkConfigProperties": {
+      "description": "SparkConfigProperties: Spark configuration file to specify additional properties",
+      "properties": {
+        "configurationType": {
+          "description": "ConfigurationType: The type of the spark config properties file.",
+          "enum": [
+            "Artifact",
+            "File"
+          ],
+          "type": "string"
+        },
+        "content": {
+          "description": "Content: The spark config properties.",
+          "type": "string"
+        },
+        "filename": {
+          "description": "Filename: The filename of the spark config properties file.",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "sparkEventsFolder": {
+      "description": "SparkEventsFolder: The Spark events folder",
+      "type": "string"
+    },
+    "sparkVersion": {
+      "description": "SparkVersion: The Apache Spark version.",
+      "type": "string"
+    },
+    "tags": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Tags: Resource tags.",
+      "type": "object"
+    }
+  },
+  "required": [
+    "location",
+    "owner"
+  ],
+  "title": "Azure Synapse WorkspacesBigDataPool",
+  "type": "object"
+}

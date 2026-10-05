@@ -1,0 +1,309 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "description": "Provision an Azure Cdn Route via Azure Service Operator. Fields mirror the cdn.azure.com/v1api20230501 Route spec.",
+  "properties": {
+    "azureName": {
+      "description": "AzureName: The name of the resource in Azure. This is often the same as the name of the resource in Kubernetes but it\ndoesn't have to be.",
+      "type": "string"
+    },
+    "cacheConfiguration": {
+      "description": "CacheConfiguration: The caching configuration for this route. To disable caching, do not provide a cacheConfiguration\nobject.",
+      "properties": {
+        "compressionSettings": {
+          "description": "CompressionSettings: compression settings.",
+          "properties": {
+            "contentTypesToCompress": {
+              "description": "ContentTypesToCompress: List of content types on which compression applies. The value should be a valid MIME type.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "isCompressionEnabled": {
+              "description": "IsCompressionEnabled: Indicates whether content compression is enabled on AzureFrontDoor. Default value is false. If\ncompression is enabled, content will be served as compressed if user requests for a compressed version. Content won't be\ncompressed on AzureFrontDoor when requested content is smaller than 1 byte or larger than 1 MB.",
+              "type": "boolean"
+            }
+          },
+          "type": "object"
+        },
+        "queryParameters": {
+          "description": "QueryParameters: query parameters to include or exclude (comma separated).",
+          "type": "string"
+        },
+        "queryStringCachingBehavior": {
+          "description": "QueryStringCachingBehavior: Defines how Frontdoor caches requests that include query strings. You can ignore any query\nstrings when caching, ignore specific query strings, cache every request with a unique URL, or cache specific query\nstrings.",
+          "enum": [
+            "IgnoreQueryString",
+            "IgnoreSpecifiedQueryStrings",
+            "IncludeSpecifiedQueryStrings",
+            "UseQueryString"
+          ],
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "credentialFrom": {
+      "default": "",
+      "description": "Name of a Kubernetes Secret holding the Azure credential to use for this resource. Rendered as the serviceoperator.azure.com/credential-from annotation. Leave empty to inherit the credential from the namespace, then from the operator's global credential. The resource's subscription and resource group come from spec.owner, not from this field.",
+      "title": "Azure credential Secret",
+      "type": "string"
+    },
+    "customDomains": {
+      "description": "CustomDomains: Domains referenced by this endpoint.",
+      "items": {
+        "description": "Reference to another resource along with its state.",
+        "properties": {
+          "reference": {
+            "description": "Reference: Resource ID.",
+            "properties": {
+              "armId": {
+                "description": "ARMID is a string of the form /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}.\nThe /resourcegroups/{resourceGroupName} bit is optional as some resources are scoped at the subscription level\nARMID is mutually exclusive with Group, Kind, Namespace and Name.",
+                "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+                "type": "string"
+              },
+              "group": {
+                "description": "Group is the Kubernetes group of the resource.",
+                "type": "string"
+              },
+              "kind": {
+                "description": "Kind is the Kubernetes kind of the resource.",
+                "type": "string"
+              },
+              "name": {
+                "description": "Name is the Kubernetes name of the resource.",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "enabledState": {
+      "description": "EnabledState: Whether to enable use of this rule. Permitted values are 'Enabled' or 'Disabled'",
+      "enum": [
+        "Disabled",
+        "Enabled"
+      ],
+      "type": "string"
+    },
+    "forwardingProtocol": {
+      "description": "ForwardingProtocol: Protocol this rule will use when forwarding traffic to backends.",
+      "enum": [
+        "HttpOnly",
+        "HttpsOnly",
+        "MatchRequest"
+      ],
+      "type": "string"
+    },
+    "httpsRedirect": {
+      "description": "HttpsRedirect: Whether to automatically redirect HTTP traffic to HTTPS traffic. Note that this is a easy way to set up\nthis rule and it will be the first rule that gets executed.",
+      "enum": [
+        "Disabled",
+        "Enabled"
+      ],
+      "type": "string"
+    },
+    "linkToDefaultDomain": {
+      "description": "LinkToDefaultDomain: whether this route will be linked to the default endpoint domain.",
+      "enum": [
+        "Disabled",
+        "Enabled"
+      ],
+      "type": "string"
+    },
+    "operatorSpec": {
+      "description": "OperatorSpec: The specification for configuring operator behavior. This field is interpreted by the operator and not\npassed directly to Azure",
+      "properties": {
+        "configMapExpressions": {
+          "description": "ConfigMapExpressions: configures where to place operator written dynamic ConfigMaps (created with CEL expressions).",
+          "items": {
+            "description": "DestinationExpression is a CEL expression and a destination to store the result in. The destination may\nbe a secret or a configmap. The value of the expression is stored at the specified location in\nthe destination.",
+            "properties": {
+              "annotations": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Annotations is an optional set of annotations to apply to the destination resource.",
+                "type": "object"
+              },
+              "key": {
+                "description": "Key is the key in the ConfigMap or Secret being written to. If the CEL expression in Value returns a string\nthis is required to identify what key to write to. If the CEL expression in Value returns a map[string]string\nKey must not be set, instead the keys written will be determined dynamically based on the keys of the resulting\nmap[string]string.",
+                "type": "string"
+              },
+              "labels": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Labels is an optional set of labels to apply to the destination resource.",
+                "type": "object"
+              },
+              "name": {
+                "description": "Name is the name of the Kubernetes configmap or secret to write to.\nThe configmap or secret will be created in the same namespace as the resource.",
+                "type": "string"
+              },
+              "value": {
+                "description": "Value is a CEL expression. The CEL expression may return a string or a map[string]string. For more information\non CEL in ASO see https://azure.github.io/azure-service-operator/guide/expressions/",
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "value"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "secretExpressions": {
+          "description": "SecretExpressions: configures where to place operator written dynamic secrets (created with CEL expressions).",
+          "items": {
+            "description": "DestinationExpression is a CEL expression and a destination to store the result in. The destination may\nbe a secret or a configmap. The value of the expression is stored at the specified location in\nthe destination.",
+            "properties": {
+              "annotations": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Annotations is an optional set of annotations to apply to the destination resource.",
+                "type": "object"
+              },
+              "key": {
+                "description": "Key is the key in the ConfigMap or Secret being written to. If the CEL expression in Value returns a string\nthis is required to identify what key to write to. If the CEL expression in Value returns a map[string]string\nKey must not be set, instead the keys written will be determined dynamically based on the keys of the resulting\nmap[string]string.",
+                "type": "string"
+              },
+              "labels": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Labels is an optional set of labels to apply to the destination resource.",
+                "type": "object"
+              },
+              "name": {
+                "description": "Name is the name of the Kubernetes configmap or secret to write to.\nThe configmap or secret will be created in the same namespace as the resource.",
+                "type": "string"
+              },
+              "value": {
+                "description": "Value is a CEL expression. The CEL expression may return a string or a map[string]string. For more information\non CEL in ASO see https://azure.github.io/azure-service-operator/guide/expressions/",
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "value"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "originGroup": {
+      "description": "OriginGroup: A reference to the origin group.",
+      "properties": {
+        "reference": {
+          "description": "Reference: Resource ID.",
+          "properties": {
+            "armId": {
+              "description": "ARMID is a string of the form /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}.\nThe /resourcegroups/{resourceGroupName} bit is optional as some resources are scoped at the subscription level\nARMID is mutually exclusive with Group, Kind, Namespace and Name.",
+              "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+              "type": "string"
+            },
+            "group": {
+              "description": "Group is the Kubernetes group of the resource.",
+              "type": "string"
+            },
+            "kind": {
+              "description": "Kind is the Kubernetes kind of the resource.",
+              "type": "string"
+            },
+            "name": {
+              "description": "Name is the Kubernetes name of the resource.",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "originPath": {
+      "description": "OriginPath: A directory path on the origin that AzureFrontDoor can use to retrieve content from, e.g.\ncontoso.cloudapp.net/originpath.",
+      "type": "string"
+    },
+    "owner": {
+      "description": "Owner: The owner of the resource. The owner controls where the resource goes when it is deployed. The owner also\ncontrols the resources lifecycle. When the owner is deleted the resource will also be deleted. Owner is expected to be a\nreference to a cdn.azure.com/AfdEndpoint resource",
+      "properties": {
+        "armId": {
+          "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+          "type": "string"
+        },
+        "name": {
+          "description": "This is the name of the Kubernetes resource to reference.",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "patternsToMatch": {
+      "description": "PatternsToMatch: The route patterns of the rule.",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "ruleSets": {
+      "description": "RuleSets: rule sets referenced by this endpoint.",
+      "items": {
+        "description": "Reference to another resource.",
+        "properties": {
+          "reference": {
+            "description": "Reference: Resource ID.",
+            "properties": {
+              "armId": {
+                "description": "ARMID is a string of the form /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}.\nThe /resourcegroups/{resourceGroupName} bit is optional as some resources are scoped at the subscription level\nARMID is mutually exclusive with Group, Kind, Namespace and Name.",
+                "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+                "type": "string"
+              },
+              "group": {
+                "description": "Group is the Kubernetes group of the resource.",
+                "type": "string"
+              },
+              "kind": {
+                "description": "Kind is the Kubernetes kind of the resource.",
+                "type": "string"
+              },
+              "name": {
+                "description": "Name is the Kubernetes name of the resource.",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "supportedProtocols": {
+      "description": "SupportedProtocols: List of supported protocols for this route.",
+      "items": {
+        "description": "Supported protocols for the customer's endpoint.",
+        "enum": [
+          "Http",
+          "Https"
+        ],
+        "type": "string"
+      },
+      "type": "array"
+    }
+  },
+  "required": [
+    "owner"
+  ],
+  "title": "Azure Cdn Route",
+  "type": "object"
+}

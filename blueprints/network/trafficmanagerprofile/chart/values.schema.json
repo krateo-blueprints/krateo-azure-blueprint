@@ -1,0 +1,316 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "description": "Provision an Azure Network TrafficManagerProfile via Azure Service Operator. Fields mirror the network.azure.com/v1api20220401 TrafficManagerProfile spec.",
+  "properties": {
+    "allowedEndpointRecordTypes": {
+      "description": "AllowedEndpointRecordTypes: The list of allowed endpoint record types.",
+      "items": {
+        "description": "The allowed type DNS record types for this profile.",
+        "enum": [
+          "Any",
+          "DomainName",
+          "IPv4Address",
+          "IPv6Address"
+        ],
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "azureName": {
+      "description": "AzureName: The name of the resource in Azure. This is often the same as the name of the resource in Kubernetes but it\ndoesn't have to be.",
+      "type": "string"
+    },
+    "credentialFrom": {
+      "default": "",
+      "description": "Name of a Kubernetes Secret holding the Azure credential to use for this resource. Rendered as the serviceoperator.azure.com/credential-from annotation. Leave empty to inherit the credential from the namespace, then from the operator's global credential. The resource's subscription and resource group come from spec.owner, not from this field.",
+      "title": "Azure credential Secret",
+      "type": "string"
+    },
+    "dnsConfig": {
+      "description": "DnsConfig: The DNS settings of the Traffic Manager profile.",
+      "properties": {
+        "relativeName": {
+          "description": "RelativeName: The relative DNS name provided by this Traffic Manager profile. This value is combined with the DNS domain\nname used by Azure Traffic Manager to form the fully-qualified domain name (FQDN) of the profile.",
+          "type": "string"
+        },
+        "ttl": {
+          "description": "Ttl: The DNS Time-To-Live (TTL), in seconds. This informs the local DNS resolvers and DNS clients how long to cache DNS\nresponses provided by this Traffic Manager profile.",
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "location": {
+      "description": "Location: The Azure Region where the resource lives",
+      "type": "string"
+    },
+    "maxReturn": {
+      "description": "MaxReturn: Maximum number of endpoints to be returned for MultiValue routing type.",
+      "type": "integer"
+    },
+    "monitorConfig": {
+      "description": "MonitorConfig: The endpoint monitoring settings of the Traffic Manager profile.",
+      "properties": {
+        "customHeaders": {
+          "description": "CustomHeaders: List of custom headers.",
+          "items": {
+            "description": "Custom header name and value.",
+            "properties": {
+              "name": {
+                "description": "Name: Header name.",
+                "type": "string"
+              },
+              "value": {
+                "description": "Value: Header value.",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "expectedStatusCodeRanges": {
+          "description": "ExpectedStatusCodeRanges: List of expected status code ranges.",
+          "items": {
+            "description": "Min and max value of a status code range.",
+            "properties": {
+              "max": {
+                "description": "Max: Max status code.",
+                "type": "integer"
+              },
+              "min": {
+                "description": "Min: Min status code.",
+                "type": "integer"
+              }
+            },
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "intervalInSeconds": {
+          "description": "IntervalInSeconds: The monitor interval for endpoints in this profile. This is the interval at which Traffic Manager\nwill check the health of each endpoint in this profile.",
+          "type": "integer"
+        },
+        "path": {
+          "description": "Path: The path relative to the endpoint domain name used to probe for endpoint health.",
+          "type": "string"
+        },
+        "port": {
+          "description": "Port: The TCP port used to probe for endpoint health.",
+          "type": "integer"
+        },
+        "profileMonitorStatus": {
+          "description": "ProfileMonitorStatus: The profile-level monitoring status of the Traffic Manager profile.",
+          "enum": [
+            "CheckingEndpoints",
+            "Degraded",
+            "Disabled",
+            "Inactive",
+            "Online"
+          ],
+          "type": "string"
+        },
+        "protocol": {
+          "description": "Protocol: The protocol (HTTP, HTTPS or TCP) used to probe for endpoint health.",
+          "enum": [
+            "HTTP",
+            "HTTPS",
+            "TCP"
+          ],
+          "type": "string"
+        },
+        "timeoutInSeconds": {
+          "description": "TimeoutInSeconds: The monitor timeout for endpoints in this profile. This is the time that Traffic Manager allows\nendpoints in this profile to response to the health check.",
+          "type": "integer"
+        },
+        "toleratedNumberOfFailures": {
+          "description": "ToleratedNumberOfFailures: The number of consecutive failed health check that Traffic Manager tolerates before declaring\nan endpoint in this profile Degraded after the next failed health check.",
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "operatorSpec": {
+      "description": "OperatorSpec: The specification for configuring operator behavior. This field is interpreted by the operator and not\npassed directly to Azure",
+      "properties": {
+        "configMapExpressions": {
+          "description": "ConfigMapExpressions: configures where to place operator written dynamic ConfigMaps (created with CEL expressions).",
+          "items": {
+            "description": "DestinationExpression is a CEL expression and a destination to store the result in. The destination may\nbe a secret or a configmap. The value of the expression is stored at the specified location in\nthe destination.",
+            "properties": {
+              "annotations": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Annotations is an optional set of annotations to apply to the destination resource.",
+                "type": "object"
+              },
+              "key": {
+                "description": "Key is the key in the ConfigMap or Secret being written to. If the CEL expression in Value returns a string\nthis is required to identify what key to write to. If the CEL expression in Value returns a map[string]string\nKey must not be set, instead the keys written will be determined dynamically based on the keys of the resulting\nmap[string]string.",
+                "type": "string"
+              },
+              "labels": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Labels is an optional set of labels to apply to the destination resource.",
+                "type": "object"
+              },
+              "name": {
+                "description": "Name is the name of the Kubernetes configmap or secret to write to.\nThe configmap or secret will be created in the same namespace as the resource.",
+                "type": "string"
+              },
+              "value": {
+                "description": "Value is a CEL expression. The CEL expression may return a string or a map[string]string. For more information\non CEL in ASO see https://azure.github.io/azure-service-operator/guide/expressions/",
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "value"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "configMaps": {
+          "description": "ConfigMaps: configures where to place operator written ConfigMaps.",
+          "properties": {
+            "dnsConfigFqdn": {
+              "description": "DnsConfigFqdn: indicates where the DnsConfigFqdn config map should be placed. If omitted, no config map will be created.",
+              "properties": {
+                "annotations": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "description": "Annotations is an optional set of annotations to apply to the ConfigMap.",
+                  "type": "object"
+                },
+                "key": {
+                  "description": "Key is the key in the ConfigMap being referenced",
+                  "type": "string"
+                },
+                "labels": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "description": "Labels is an optional set of labels to apply to the ConfigMap.",
+                  "type": "object"
+                },
+                "name": {
+                  "description": "Name is the name of the Kubernetes ConfigMap to write to.\nThe ConfigMap will be created in the same namespace as the resource.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "key",
+                "name"
+              ],
+              "type": "object"
+            }
+          },
+          "type": "object"
+        },
+        "secretExpressions": {
+          "description": "SecretExpressions: configures where to place operator written dynamic secrets (created with CEL expressions).",
+          "items": {
+            "description": "DestinationExpression is a CEL expression and a destination to store the result in. The destination may\nbe a secret or a configmap. The value of the expression is stored at the specified location in\nthe destination.",
+            "properties": {
+              "annotations": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Annotations is an optional set of annotations to apply to the destination resource.",
+                "type": "object"
+              },
+              "key": {
+                "description": "Key is the key in the ConfigMap or Secret being written to. If the CEL expression in Value returns a string\nthis is required to identify what key to write to. If the CEL expression in Value returns a map[string]string\nKey must not be set, instead the keys written will be determined dynamically based on the keys of the resulting\nmap[string]string.",
+                "type": "string"
+              },
+              "labels": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Labels is an optional set of labels to apply to the destination resource.",
+                "type": "object"
+              },
+              "name": {
+                "description": "Name is the name of the Kubernetes configmap or secret to write to.\nThe configmap or secret will be created in the same namespace as the resource.",
+                "type": "string"
+              },
+              "value": {
+                "description": "Value is a CEL expression. The CEL expression may return a string or a map[string]string. For more information\non CEL in ASO see https://azure.github.io/azure-service-operator/guide/expressions/",
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "value"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "owner": {
+      "description": "Owner: The owner of the resource. The owner controls where the resource goes when it is deployed. The owner also\ncontrols the resources lifecycle. When the owner is deleted the resource will also be deleted. Owner is expected to be a\nreference to a resources.azure.com/ResourceGroup resource",
+      "properties": {
+        "armId": {
+          "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+          "type": "string"
+        },
+        "name": {
+          "description": "This is the name of the Kubernetes resource to reference.",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "profileStatus": {
+      "description": "ProfileStatus: The status of the Traffic Manager profile.",
+      "enum": [
+        "Disabled",
+        "Enabled"
+      ],
+      "type": "string"
+    },
+    "tags": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Tags: Resource tags.",
+      "type": "object"
+    },
+    "trafficRoutingMethod": {
+      "description": "TrafficRoutingMethod: The traffic routing method of the Traffic Manager profile.",
+      "enum": [
+        "Geographic",
+        "MultiValue",
+        "Performance",
+        "Priority",
+        "Subnet",
+        "Weighted"
+      ],
+      "type": "string"
+    },
+    "trafficViewEnrollmentStatus": {
+      "description": "TrafficViewEnrollmentStatus: Indicates whether Traffic View is 'Enabled' or 'Disabled' for the Traffic Manager profile.\nNull, indicates 'Disabled'. Enabling this feature will increase the cost of the Traffic Manage profile.",
+      "enum": [
+        "Disabled",
+        "Enabled"
+      ],
+      "type": "string"
+    },
+    "type": {
+      "description": "Type: The type of the resource. Ex- Microsoft.Network/trafficManagerProfiles.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "owner"
+  ],
+  "title": "Azure Network TrafficManagerProfile",
+  "type": "object"
+}

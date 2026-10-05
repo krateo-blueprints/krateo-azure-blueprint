@@ -1,0 +1,639 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "description": "Provision an Azure Dataprotection BackupVaultsBackupPolicy via Azure Service Operator. Fields mirror the dataprotection.azure.com/v1api20231101 BackupVaultsBackupPolicy spec.",
+  "properties": {
+    "azureName": {
+      "description": "AzureName: The name of the resource in Azure. This is often the same as the name of the resource in Kubernetes but it\ndoesn't have to be.",
+      "type": "string"
+    },
+    "credentialFrom": {
+      "default": "",
+      "description": "Name of a Kubernetes Secret holding the Azure credential to use for this resource. Rendered as the serviceoperator.azure.com/credential-from annotation. Leave empty to inherit the credential from the namespace, then from the operator's global credential. The resource's subscription and resource group come from spec.owner, not from this field.",
+      "title": "Azure credential Secret",
+      "type": "string"
+    },
+    "operatorSpec": {
+      "description": "OperatorSpec: The specification for configuring operator behavior. This field is interpreted by the operator and not\npassed directly to Azure",
+      "properties": {
+        "configMapExpressions": {
+          "description": "ConfigMapExpressions: configures where to place operator written dynamic ConfigMaps (created with CEL expressions).",
+          "items": {
+            "description": "DestinationExpression is a CEL expression and a destination to store the result in. The destination may\nbe a secret or a configmap. The value of the expression is stored at the specified location in\nthe destination.",
+            "properties": {
+              "annotations": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Annotations is an optional set of annotations to apply to the destination resource.",
+                "type": "object"
+              },
+              "key": {
+                "description": "Key is the key in the ConfigMap or Secret being written to. If the CEL expression in Value returns a string\nthis is required to identify what key to write to. If the CEL expression in Value returns a map[string]string\nKey must not be set, instead the keys written will be determined dynamically based on the keys of the resulting\nmap[string]string.",
+                "type": "string"
+              },
+              "labels": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Labels is an optional set of labels to apply to the destination resource.",
+                "type": "object"
+              },
+              "name": {
+                "description": "Name is the name of the Kubernetes configmap or secret to write to.\nThe configmap or secret will be created in the same namespace as the resource.",
+                "type": "string"
+              },
+              "value": {
+                "description": "Value is a CEL expression. The CEL expression may return a string or a map[string]string. For more information\non CEL in ASO see https://azure.github.io/azure-service-operator/guide/expressions/",
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "value"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "secretExpressions": {
+          "description": "SecretExpressions: configures where to place operator written dynamic secrets (created with CEL expressions).",
+          "items": {
+            "description": "DestinationExpression is a CEL expression and a destination to store the result in. The destination may\nbe a secret or a configmap. The value of the expression is stored at the specified location in\nthe destination.",
+            "properties": {
+              "annotations": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Annotations is an optional set of annotations to apply to the destination resource.",
+                "type": "object"
+              },
+              "key": {
+                "description": "Key is the key in the ConfigMap or Secret being written to. If the CEL expression in Value returns a string\nthis is required to identify what key to write to. If the CEL expression in Value returns a map[string]string\nKey must not be set, instead the keys written will be determined dynamically based on the keys of the resulting\nmap[string]string.",
+                "type": "string"
+              },
+              "labels": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Labels is an optional set of labels to apply to the destination resource.",
+                "type": "object"
+              },
+              "name": {
+                "description": "Name is the name of the Kubernetes configmap or secret to write to.\nThe configmap or secret will be created in the same namespace as the resource.",
+                "type": "string"
+              },
+              "value": {
+                "description": "Value is a CEL expression. The CEL expression may return a string or a map[string]string. For more information\non CEL in ASO see https://azure.github.io/azure-service-operator/guide/expressions/",
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "value"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "owner": {
+      "description": "Owner: The owner of the resource. The owner controls where the resource goes when it is deployed. The owner also\ncontrols the resources lifecycle. When the owner is deleted the resource will also be deleted. Owner is expected to be a\nreference to a dataprotection.azure.com/BackupVault resource",
+      "properties": {
+        "armId": {
+          "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+          "type": "string"
+        },
+        "name": {
+          "description": "This is the name of the Kubernetes resource to reference.",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "properties": {
+      "description": "Properties: BaseBackupPolicyResource properties",
+      "properties": {
+        "backupPolicy": {
+          "description": "BackupPolicy: Mutually exclusive with all other properties",
+          "properties": {
+            "datasourceTypes": {
+              "description": "DatasourceTypes: Type of datasource for the backup management",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "objectType": {
+              "enum": [
+                "BackupPolicy"
+              ],
+              "type": "string"
+            },
+            "policyRules": {
+              "description": "PolicyRules: Policy rule dictionary that contains rules for each backuptype i.e Full/Incremental/Logs etc",
+              "items": {
+                "properties": {
+                  "azureBackupRule": {
+                    "description": "AzureBackup: Mutually exclusive with all other properties",
+                    "properties": {
+                      "backupParameters": {
+                        "properties": {
+                          "azureBackupParams": {
+                            "description": "AzureBackupParams: Mutually exclusive with all other properties",
+                            "properties": {
+                              "backupType": {
+                                "description": "BackupType: BackupType ; Full/Incremental etc",
+                                "type": "string"
+                              },
+                              "objectType": {
+                                "description": "ObjectType: Type of the specific object - used for deserializing",
+                                "enum": [
+                                  "AzureBackupParams"
+                                ],
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "backupType",
+                              "objectType"
+                            ],
+                            "type": "object"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "dataStore": {
+                        "description": "DataStore: DataStoreInfo base",
+                        "properties": {
+                          "dataStoreType": {
+                            "description": "DataStoreType: type of datastore; Operational/Vault/Archive",
+                            "enum": [
+                              "ArchiveStore",
+                              "OperationalStore",
+                              "VaultStore"
+                            ],
+                            "type": "string"
+                          },
+                          "objectType": {
+                            "description": "ObjectType: Type of Datasource object, used to initialize the right inherited type",
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "dataStoreType",
+                          "objectType"
+                        ],
+                        "type": "object"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "objectType": {
+                        "enum": [
+                          "AzureBackupRule"
+                        ],
+                        "type": "string"
+                      },
+                      "trigger": {
+                        "properties": {
+                          "adhocBasedTriggerContext": {
+                            "description": "Adhoc: Mutually exclusive with all other properties",
+                            "properties": {
+                              "objectType": {
+                                "description": "ObjectType: Type of the specific object - used for deserializing",
+                                "enum": [
+                                  "AdhocBasedTriggerContext"
+                                ],
+                                "type": "string"
+                              },
+                              "taggingCriteria": {
+                                "description": "TaggingCriteria: Tagging Criteria containing retention tag for adhoc backup.",
+                                "properties": {
+                                  "tagInfo": {
+                                    "description": "TagInfo: Retention tag information",
+                                    "properties": {
+                                      "tagName": {
+                                        "description": "TagName: Retention Tag Name to relate it to retention rule.",
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "tagName"
+                                    ],
+                                    "type": "object"
+                                  }
+                                },
+                                "type": "object"
+                              }
+                            },
+                            "required": [
+                              "objectType",
+                              "taggingCriteria"
+                            ],
+                            "type": "object"
+                          },
+                          "scheduleBasedTriggerContext": {
+                            "description": "Schedule: Mutually exclusive with all other properties",
+                            "properties": {
+                              "objectType": {
+                                "description": "ObjectType: Type of the specific object - used for deserializing",
+                                "enum": [
+                                  "ScheduleBasedTriggerContext"
+                                ],
+                                "type": "string"
+                              },
+                              "schedule": {
+                                "description": "Schedule: Schedule for this backup",
+                                "properties": {
+                                  "repeatingTimeIntervals": {
+                                    "description": "RepeatingTimeIntervals: Repeating time intervals that define the backup schedule.\nEach value must follow the format: `R/YYYY-MM-DDThh:mm:ss[.fff][Z|(+/-)hh:mm]/Duration`\nOnly the exact formats listed below are supported. Other ISO 8601 variations are not accepted.\nSupported time formats:\n- `Thh:mm:ss.fff` (with milliseconds)\n- `Thh:mm:ss` (with seconds)\n- `Thh:mm` (hours and minutes only)\nA timezone indicator (`Z`, `+hh:mm`, or `-hh:mm`) may be appended to any of the above.\nUnsupported formats include compact notation such as `T1430`, `T143045`, or `T14.5`.\nExamples:\n- `R/2023-10-15T14:30:00Z/P1W`\n- `R/2023-10-15T14:30:45.123+05:30/P1D`\n- `R/2023-10-15T14:30Z/P1D`",
+                                    "items": {
+                                      "type": "string"
+                                    },
+                                    "type": "array"
+                                  },
+                                  "timeZone": {
+                                    "description": "TimeZone: Time Zone for a schedule.\nSupported timezone indicators include:\n- 'Z' for UTC\n- '+00:00'\n- '+05:30'\n- '-08:00'\nExamples:\n- 2023-10-15T14:30:45Z\n- 2023-10-15T14:30:45.123+05:30\n- 2023-10-15T14:30-08:00",
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "repeatingTimeIntervals"
+                                ],
+                                "type": "object"
+                              },
+                              "taggingCriteria": {
+                                "description": "TaggingCriteria: List of tags that can be applicable for given schedule.",
+                                "items": {
+                                  "description": "Tagging criteria",
+                                  "properties": {
+                                    "criteria": {
+                                      "description": "Criteria: Criteria which decides whether the tag can be applied to a triggered backup.",
+                                      "items": {
+                                        "properties": {
+                                          "scheduleBasedBackupCriteria": {
+                                            "description": "ScheduleBasedBackupCriteria: Mutually exclusive with all other properties",
+                                            "properties": {
+                                              "absoluteCriteria": {
+                                                "description": "AbsoluteCriteria: it contains absolute values like \"AllBackup\" / \"FirstOfDay\" / \"FirstOfWeek\" / \"FirstOfMonth\"\nand should be part of AbsoluteMarker enum",
+                                                "items": {
+                                                  "enum": [
+                                                    "AllBackup",
+                                                    "FirstOfDay",
+                                                    "FirstOfMonth",
+                                                    "FirstOfWeek",
+                                                    "FirstOfYear"
+                                                  ],
+                                                  "type": "string"
+                                                },
+                                                "type": "array"
+                                              },
+                                              "daysOfMonth": {
+                                                "description": "DaysOfMonth: This is day of the month from 1 to 28 other wise last of month",
+                                                "items": {
+                                                  "description": "Day of the week",
+                                                  "properties": {
+                                                    "date": {
+                                                      "description": "Date: Date of the month",
+                                                      "type": "integer"
+                                                    },
+                                                    "isLast": {
+                                                      "description": "IsLast: Whether Date is last date of month",
+                                                      "type": "boolean"
+                                                    }
+                                                  },
+                                                  "type": "object"
+                                                },
+                                                "type": "array"
+                                              },
+                                              "daysOfTheWeek": {
+                                                "description": "DaysOfTheWeek: It should be Sunday/Monday/T..../Saturday",
+                                                "items": {
+                                                  "enum": [
+                                                    "Friday",
+                                                    "Monday",
+                                                    "Saturday",
+                                                    "Sunday",
+                                                    "Thursday",
+                                                    "Tuesday",
+                                                    "Wednesday"
+                                                  ],
+                                                  "type": "string"
+                                                },
+                                                "type": "array"
+                                              },
+                                              "monthsOfYear": {
+                                                "description": "MonthsOfYear: It should be January/February/....../December",
+                                                "items": {
+                                                  "enum": [
+                                                    "April",
+                                                    "August",
+                                                    "December",
+                                                    "February",
+                                                    "January",
+                                                    "July",
+                                                    "June",
+                                                    "March",
+                                                    "May",
+                                                    "November",
+                                                    "October",
+                                                    "September"
+                                                  ],
+                                                  "type": "string"
+                                                },
+                                                "type": "array"
+                                              },
+                                              "objectType": {
+                                                "description": "ObjectType: Type of the specific object - used for deserializing",
+                                                "enum": [
+                                                  "ScheduleBasedBackupCriteria"
+                                                ],
+                                                "type": "string"
+                                              },
+                                              "scheduleTimes": {
+                                                "description": "ScheduleTimes: List of schedule times for backup",
+                                                "items": {
+                                                  "type": "string"
+                                                },
+                                                "type": "array"
+                                              },
+                                              "weeksOfTheMonth": {
+                                                "description": "WeeksOfTheMonth: It should be First/Second/Third/Fourth/Last",
+                                                "items": {
+                                                  "enum": [
+                                                    "First",
+                                                    "Fourth",
+                                                    "Last",
+                                                    "Second",
+                                                    "Third"
+                                                  ],
+                                                  "type": "string"
+                                                },
+                                                "type": "array"
+                                              }
+                                            },
+                                            "required": [
+                                              "objectType"
+                                            ],
+                                            "type": "object"
+                                          }
+                                        },
+                                        "type": "object"
+                                      },
+                                      "type": "array"
+                                    },
+                                    "isDefault": {
+                                      "description": "IsDefault: Specifies if tag is default.",
+                                      "type": "boolean"
+                                    },
+                                    "tagInfo": {
+                                      "description": "TagInfo: Retention tag information",
+                                      "properties": {
+                                        "tagName": {
+                                          "description": "TagName: Retention Tag Name to relate it to retention rule.",
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "tagName"
+                                      ],
+                                      "type": "object"
+                                    },
+                                    "taggingPriority": {
+                                      "description": "TaggingPriority: Retention Tag priority.",
+                                      "type": "integer"
+                                    }
+                                  },
+                                  "required": [
+                                    "isDefault",
+                                    "tagInfo",
+                                    "taggingPriority"
+                                  ],
+                                  "type": "object"
+                                },
+                                "type": "array"
+                              }
+                            },
+                            "required": [
+                              "objectType",
+                              "schedule",
+                              "taggingCriteria"
+                            ],
+                            "type": "object"
+                          }
+                        },
+                        "type": "object"
+                      }
+                    },
+                    "required": [
+                      "dataStore",
+                      "name",
+                      "objectType",
+                      "trigger"
+                    ],
+                    "type": "object"
+                  },
+                  "azureRetentionRule": {
+                    "description": "AzureRetention: Mutually exclusive with all other properties",
+                    "properties": {
+                      "isDefault": {
+                        "type": "boolean"
+                      },
+                      "lifecycles": {
+                        "items": {
+                          "description": "Source LifeCycle",
+                          "properties": {
+                            "deleteAfter": {
+                              "properties": {
+                                "absoluteDeleteOption": {
+                                  "description": "AbsoluteDeleteOption: Mutually exclusive with all other properties",
+                                  "properties": {
+                                    "duration": {
+                                      "description": "Duration: Duration of deletion after given timespan",
+                                      "type": "string"
+                                    },
+                                    "objectType": {
+                                      "description": "ObjectType: Type of the specific object - used for deserializing",
+                                      "enum": [
+                                        "AbsoluteDeleteOption"
+                                      ],
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "duration",
+                                    "objectType"
+                                  ],
+                                  "type": "object"
+                                }
+                              },
+                              "type": "object"
+                            },
+                            "sourceDataStore": {
+                              "description": "SourceDataStore: DataStoreInfo base",
+                              "properties": {
+                                "dataStoreType": {
+                                  "description": "DataStoreType: type of datastore; Operational/Vault/Archive",
+                                  "enum": [
+                                    "ArchiveStore",
+                                    "OperationalStore",
+                                    "VaultStore"
+                                  ],
+                                  "type": "string"
+                                },
+                                "objectType": {
+                                  "description": "ObjectType: Type of Datasource object, used to initialize the right inherited type",
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "dataStoreType",
+                                "objectType"
+                              ],
+                              "type": "object"
+                            },
+                            "targetDataStoreCopySettings": {
+                              "items": {
+                                "description": "Target copy settings",
+                                "properties": {
+                                  "copyAfter": {
+                                    "description": "CopyAfter: It can be CustomCopyOption or ImmediateCopyOption.",
+                                    "properties": {
+                                      "copyOnExpiryOption": {
+                                        "description": "CopyOnExpiry: Mutually exclusive with all other properties",
+                                        "properties": {
+                                          "objectType": {
+                                            "description": "ObjectType: Type of the specific object - used for deserializing",
+                                            "enum": [
+                                              "CopyOnExpiryOption"
+                                            ],
+                                            "type": "string"
+                                          }
+                                        },
+                                        "required": [
+                                          "objectType"
+                                        ],
+                                        "type": "object"
+                                      },
+                                      "customCopyOption": {
+                                        "description": "CustomCopy: Mutually exclusive with all other properties",
+                                        "properties": {
+                                          "duration": {
+                                            "description": "Duration: Data copied after given timespan",
+                                            "type": "string"
+                                          },
+                                          "objectType": {
+                                            "description": "ObjectType: Type of the specific object - used for deserializing",
+                                            "enum": [
+                                              "CustomCopyOption"
+                                            ],
+                                            "type": "string"
+                                          }
+                                        },
+                                        "required": [
+                                          "objectType"
+                                        ],
+                                        "type": "object"
+                                      },
+                                      "immediateCopyOption": {
+                                        "description": "ImmediateCopy: Mutually exclusive with all other properties",
+                                        "properties": {
+                                          "objectType": {
+                                            "description": "ObjectType: Type of the specific object - used for deserializing",
+                                            "enum": [
+                                              "ImmediateCopyOption"
+                                            ],
+                                            "type": "string"
+                                          }
+                                        },
+                                        "required": [
+                                          "objectType"
+                                        ],
+                                        "type": "object"
+                                      }
+                                    },
+                                    "type": "object"
+                                  },
+                                  "dataStore": {
+                                    "description": "DataStore: Info of target datastore",
+                                    "properties": {
+                                      "dataStoreType": {
+                                        "description": "DataStoreType: type of datastore; Operational/Vault/Archive",
+                                        "enum": [
+                                          "ArchiveStore",
+                                          "OperationalStore",
+                                          "VaultStore"
+                                        ],
+                                        "type": "string"
+                                      },
+                                      "objectType": {
+                                        "description": "ObjectType: Type of Datasource object, used to initialize the right inherited type",
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "dataStoreType",
+                                      "objectType"
+                                    ],
+                                    "type": "object"
+                                  }
+                                },
+                                "required": [
+                                  "copyAfter",
+                                  "dataStore"
+                                ],
+                                "type": "object"
+                              },
+                              "type": "array"
+                            }
+                          },
+                          "required": [
+                            "deleteAfter",
+                            "sourceDataStore"
+                          ],
+                          "type": "object"
+                        },
+                        "type": "array"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "objectType": {
+                        "enum": [
+                          "AzureRetentionRule"
+                        ],
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "lifecycles",
+                      "name",
+                      "objectType"
+                    ],
+                    "type": "object"
+                  }
+                },
+                "type": "object"
+              },
+              "type": "array"
+            }
+          },
+          "required": [
+            "datasourceTypes",
+            "objectType",
+            "policyRules"
+          ],
+          "type": "object"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "required": [
+    "owner"
+  ],
+  "title": "Azure Dataprotection BackupVaultsBackupPolicy",
+  "type": "object"
+}

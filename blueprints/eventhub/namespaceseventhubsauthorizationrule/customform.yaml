@@ -1,0 +1,90 @@
+apiVersion: v1
+data:
+  drawer: "true"
+  form: "true"
+  showFormStructure: "true"
+  drawerSize: large
+kind: ConfigMap
+metadata:
+  name: template-azure-eventhub-namespaceseventhubsauthorizationrule-card
+  namespace: azure-eventhub-system
+---
+apiVersion: templates.krateo.io/v1alpha1
+kind: Widget
+metadata:
+  name: template-azure-eventhub-namespaceseventhubsauthorizationrule-card
+  namespace: azure-eventhub-system
+spec:
+  actions:
+  - template:
+      apiVersion: templates.krateo.io/v1alpha1
+      name: template-azure-eventhub-namespaceseventhubsauthorizationrule-customform
+      namespace: azure-eventhub-system
+      resource: customforms
+      verb: GET
+  - template:
+      apiVersion: core.krateo.io/v1alpha1
+      name: azure-eventhub-namespaceseventhubsauthorizationrule
+      namespace: azure-eventhub-system
+      resource: compositiondefinitions
+      verb: DELETE
+  app:
+    template:
+      color: ${ .getCompositionDefinition.status.conditions[] | select(.type == "Ready") | if .status == "False" then "orange" elif .status == "True" then "green" else "grey" end }
+      content: Provision an Azure Eventhub NamespacesEventhubsAuthorizationRule via Azure Service Operator.
+      icon: fa-brands fa-microsoft
+      tags: azure-eventhub-system,0.1.0
+      title: azure-eventhub-namespaceseventhubsauthorizationrule
+      status: ${ .getCompositionDefinition.status.conditions[] | select(.type == "Ready") | "Ready:" + .status }
+      date: ${ .getCompositionDefinition.metadata.creationTimestamp }
+  propsRef:
+    name: template-azure-eventhub-namespaceseventhubsauthorizationrule-card
+    namespace: azure-eventhub-system
+  type: card
+  api:
+  - name: getCompositionDefinition
+    path: "/apis/core.krateo.io/v1alpha1/namespaces/azure-eventhub-system/compositiondefinitions/azure-eventhub-namespaceseventhubsauthorizationrule"
+    verb: GET
+    headers:
+    - 'Accept: application/json'
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: template-azure-eventhub-namespaceseventhubsauthorizationrule-customform
+  namespace: azure-eventhub-system
+data:
+  onSubmitId: submit
+  onSubmitVerb: POST
+  payloadFormKey: spec
+  redirectRoute: /compositions/${metadata.namespace}/${metadata.name}
+  redirectTimeout: "50"
+---
+apiVersion: templates.krateo.io/v1alpha1
+kind: CustomForm
+metadata:
+  name: template-azure-eventhub-namespaceseventhubsauthorizationrule-customform
+  namespace: azure-eventhub-system
+spec:
+  type: customform
+  propsRef:
+    name: template-azure-eventhub-namespaceseventhubsauthorizationrule-customform
+    namespace: azure-eventhub-system
+  actions:
+    - template:
+        id: submit
+        apiVersion: composition.krateo.io/v0-1-0
+        verb: POST
+        resource: azureeventhubnamespaceseventhubsauthorizationrules
+        payloadToOverride:
+        - name: metadata.namespace
+          value: ${ "azure-eventhub-system" }
+  app:
+    template:
+      schema: ${ .getCRD | .spec.versions[] | select(.name == "v0-1-0") | .schema.openAPIV3Schema.properties.spec }
+  api:
+  - name: getCRD
+    path: "/apis/apiextensions.k8s.io/v1/customresourcedefinitions/azureeventhubnamespaceseventhubsauthorizationrules.composition.krateo.io"
+    verb: GET
+    headers:
+    - 'Accept: application/json'

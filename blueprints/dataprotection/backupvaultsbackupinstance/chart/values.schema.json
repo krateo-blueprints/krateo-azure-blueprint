@@ -1,0 +1,579 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "description": "Provision an Azure Dataprotection BackupVaultsBackupInstance via Azure Service Operator. Fields mirror the dataprotection.azure.com/v1api20231101 BackupVaultsBackupInstance spec.",
+  "properties": {
+    "azureName": {
+      "description": "AzureName: The name of the resource in Azure. This is often the same as the name of the resource in Kubernetes but it\ndoesn't have to be.",
+      "type": "string"
+    },
+    "credentialFrom": {
+      "default": "",
+      "description": "Name of a Kubernetes Secret holding the Azure credential to use for this resource. Rendered as the serviceoperator.azure.com/credential-from annotation. Leave empty to inherit the credential from the namespace, then from the operator's global credential. The resource's subscription and resource group come from spec.owner, not from this field.",
+      "title": "Azure credential Secret",
+      "type": "string"
+    },
+    "operatorSpec": {
+      "description": "OperatorSpec: The specification for configuring operator behavior. This field is interpreted by the operator and not\npassed directly to Azure",
+      "properties": {
+        "configMapExpressions": {
+          "description": "ConfigMapExpressions: configures where to place operator written dynamic ConfigMaps (created with CEL expressions).",
+          "items": {
+            "description": "DestinationExpression is a CEL expression and a destination to store the result in. The destination may\nbe a secret or a configmap. The value of the expression is stored at the specified location in\nthe destination.",
+            "properties": {
+              "annotations": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Annotations is an optional set of annotations to apply to the destination resource.",
+                "type": "object"
+              },
+              "key": {
+                "description": "Key is the key in the ConfigMap or Secret being written to. If the CEL expression in Value returns a string\nthis is required to identify what key to write to. If the CEL expression in Value returns a map[string]string\nKey must not be set, instead the keys written will be determined dynamically based on the keys of the resulting\nmap[string]string.",
+                "type": "string"
+              },
+              "labels": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Labels is an optional set of labels to apply to the destination resource.",
+                "type": "object"
+              },
+              "name": {
+                "description": "Name is the name of the Kubernetes configmap or secret to write to.\nThe configmap or secret will be created in the same namespace as the resource.",
+                "type": "string"
+              },
+              "value": {
+                "description": "Value is a CEL expression. The CEL expression may return a string or a map[string]string. For more information\non CEL in ASO see https://azure.github.io/azure-service-operator/guide/expressions/",
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "value"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "secretExpressions": {
+          "description": "SecretExpressions: configures where to place operator written dynamic secrets (created with CEL expressions).",
+          "items": {
+            "description": "DestinationExpression is a CEL expression and a destination to store the result in. The destination may\nbe a secret or a configmap. The value of the expression is stored at the specified location in\nthe destination.",
+            "properties": {
+              "annotations": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Annotations is an optional set of annotations to apply to the destination resource.",
+                "type": "object"
+              },
+              "key": {
+                "description": "Key is the key in the ConfigMap or Secret being written to. If the CEL expression in Value returns a string\nthis is required to identify what key to write to. If the CEL expression in Value returns a map[string]string\nKey must not be set, instead the keys written will be determined dynamically based on the keys of the resulting\nmap[string]string.",
+                "type": "string"
+              },
+              "labels": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Labels is an optional set of labels to apply to the destination resource.",
+                "type": "object"
+              },
+              "name": {
+                "description": "Name is the name of the Kubernetes configmap or secret to write to.\nThe configmap or secret will be created in the same namespace as the resource.",
+                "type": "string"
+              },
+              "value": {
+                "description": "Value is a CEL expression. The CEL expression may return a string or a map[string]string. For more information\non CEL in ASO see https://azure.github.io/azure-service-operator/guide/expressions/",
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "value"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "owner": {
+      "description": "Owner: The owner of the resource. The owner controls where the resource goes when it is deployed. The owner also\ncontrols the resources lifecycle. When the owner is deleted the resource will also be deleted. Owner is expected to be a\nreference to a dataprotection.azure.com/BackupVault resource",
+      "properties": {
+        "armId": {
+          "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+          "type": "string"
+        },
+        "name": {
+          "description": "This is the name of the Kubernetes resource to reference.",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "properties": {
+      "description": "Properties: BackupInstanceResource properties",
+      "properties": {
+        "dataSourceInfo": {
+          "description": "DataSourceInfo: Gets or sets the data source information.",
+          "properties": {
+            "datasourceType": {
+              "description": "DatasourceType: DatasourceType of the resource.",
+              "type": "string"
+            },
+            "objectType": {
+              "description": "ObjectType: Type of Datasource object, used to initialize the right inherited type",
+              "type": "string"
+            },
+            "resourceLocation": {
+              "description": "ResourceLocation: Location of datasource.",
+              "type": "string"
+            },
+            "resourceName": {
+              "description": "ResourceName: Unique identifier of the resource in the context of parent.",
+              "type": "string"
+            },
+            "resourceProperties": {
+              "description": "ResourceProperties: Properties specific to data source",
+              "properties": {
+                "defaultResourceProperties": {
+                  "description": "DefaultResourceProperties: Mutually exclusive with all other properties",
+                  "properties": {
+                    "objectType": {
+                      "description": "ObjectType: Type of the specific object - used for deserializing",
+                      "enum": [
+                        "DefaultResourceProperties"
+                      ],
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "objectType"
+                  ],
+                  "type": "object"
+                }
+              },
+              "type": "object"
+            },
+            "resourceReference": {
+              "description": "ResourceReference: Full ARM ID of the resource. For azure resources, this is ARM ID. For non azure resources, this will\nbe the ID created by backup service via Fabric/Vault.",
+              "properties": {
+                "armId": {
+                  "description": "ARMID is a string of the form /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}.\nThe /resourcegroups/{resourceGroupName} bit is optional as some resources are scoped at the subscription level\nARMID is mutually exclusive with Group, Kind, Namespace and Name.",
+                  "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+                  "type": "string"
+                },
+                "group": {
+                  "description": "Group is the Kubernetes group of the resource.",
+                  "type": "string"
+                },
+                "kind": {
+                  "description": "Kind is the Kubernetes kind of the resource.",
+                  "type": "string"
+                },
+                "name": {
+                  "description": "Name is the Kubernetes name of the resource.",
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "resourceType": {
+              "description": "ResourceType: Resource Type of Datasource.",
+              "type": "string"
+            },
+            "resourceUri": {
+              "description": "ResourceUri: Uri of the resource.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "resourceReference"
+          ],
+          "type": "object"
+        },
+        "dataSourceSetInfo": {
+          "description": "DataSourceSetInfo: Gets or sets the data source set information.",
+          "properties": {
+            "datasourceType": {
+              "description": "DatasourceType: DatasourceType of the resource.",
+              "type": "string"
+            },
+            "objectType": {
+              "description": "ObjectType: Type of Datasource object, used to initialize the right inherited type",
+              "type": "string"
+            },
+            "resourceLocation": {
+              "description": "ResourceLocation: Location of datasource.",
+              "type": "string"
+            },
+            "resourceName": {
+              "description": "ResourceName: Unique identifier of the resource in the context of parent.",
+              "type": "string"
+            },
+            "resourceProperties": {
+              "description": "ResourceProperties: Properties specific to data source set",
+              "properties": {
+                "defaultResourceProperties": {
+                  "description": "DefaultResourceProperties: Mutually exclusive with all other properties",
+                  "properties": {
+                    "objectType": {
+                      "description": "ObjectType: Type of the specific object - used for deserializing",
+                      "enum": [
+                        "DefaultResourceProperties"
+                      ],
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "objectType"
+                  ],
+                  "type": "object"
+                }
+              },
+              "type": "object"
+            },
+            "resourceReference": {
+              "description": "ResourceReference: Full ARM ID of the resource. For azure resources, this is ARM ID. For non azure resources, this will\nbe the ID created by backup service via Fabric/Vault.",
+              "properties": {
+                "armId": {
+                  "description": "ARMID is a string of the form /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}.\nThe /resourcegroups/{resourceGroupName} bit is optional as some resources are scoped at the subscription level\nARMID is mutually exclusive with Group, Kind, Namespace and Name.",
+                  "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+                  "type": "string"
+                },
+                "group": {
+                  "description": "Group is the Kubernetes group of the resource.",
+                  "type": "string"
+                },
+                "kind": {
+                  "description": "Kind is the Kubernetes kind of the resource.",
+                  "type": "string"
+                },
+                "name": {
+                  "description": "Name is the Kubernetes name of the resource.",
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "resourceType": {
+              "description": "ResourceType: Resource Type of Datasource.",
+              "type": "string"
+            },
+            "resourceUri": {
+              "description": "ResourceUri: Uri of the resource.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "resourceReference"
+          ],
+          "type": "object"
+        },
+        "datasourceAuthCredentials": {
+          "description": "DatasourceAuthCredentials: Credentials to use to authenticate with data source provider.",
+          "properties": {
+            "secretStoreBasedAuthCredentials": {
+              "description": "SecretStoreBasedAuthCredentials: Mutually exclusive with all other properties",
+              "properties": {
+                "objectType": {
+                  "description": "ObjectType: Type of the specific object - used for deserializing",
+                  "enum": [
+                    "SecretStoreBasedAuthCredentials"
+                  ],
+                  "type": "string"
+                },
+                "secretStoreResource": {
+                  "description": "SecretStoreResource: Secret store resource",
+                  "properties": {
+                    "secretStoreType": {
+                      "description": "SecretStoreType: Gets or sets the type of secret store",
+                      "enum": [
+                        "AzureKeyVault",
+                        "Invalid"
+                      ],
+                      "type": "string"
+                    },
+                    "uri": {
+                      "description": "Uri: Uri to get to the resource",
+                      "type": "string"
+                    },
+                    "value": {
+                      "description": "Value: Gets or sets value stored in secret store resource",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "secretStoreType"
+                  ],
+                  "type": "object"
+                }
+              },
+              "required": [
+                "objectType"
+              ],
+              "type": "object"
+            }
+          },
+          "type": "object"
+        },
+        "friendlyName": {
+          "description": "FriendlyName: Gets or sets the Backup Instance friendly name.",
+          "type": "string"
+        },
+        "identityDetails": {
+          "description": "IdentityDetails: Contains information of the Identity Details for the BI.\nIf it is null, default will be considered as System Assigned.",
+          "properties": {
+            "useSystemAssignedIdentity": {
+              "description": "UseSystemAssignedIdentity: Specifies if the BI is protected by System Identity.",
+              "type": "boolean"
+            },
+            "userAssignedIdentityArmUrl": {
+              "description": "UserAssignedIdentityArmUrl: ARM URL for User Assigned Identity.",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "objectType": {
+          "type": "string"
+        },
+        "policyInfo": {
+          "description": "PolicyInfo: Gets or sets the policy information.",
+          "properties": {
+            "policyParameters": {
+              "description": "PolicyParameters: Policy parameters for the backup instance",
+              "properties": {
+                "backupDatasourceParametersList": {
+                  "description": "BackupDatasourceParametersList: Gets or sets the Backup Data Source Parameters",
+                  "items": {
+                    "properties": {
+                      "blobBackupDatasourceParameters": {
+                        "description": "Blob: Mutually exclusive with all other properties",
+                        "properties": {
+                          "containersList": {
+                            "description": "ContainersList: List of containers to be backed up during configuration of backup of blobs",
+                            "items": {
+                              "type": "string"
+                            },
+                            "type": "array"
+                          },
+                          "objectType": {
+                            "description": "ObjectType: Type of the specific object - used for deserializing",
+                            "enum": [
+                              "BlobBackupDatasourceParameters"
+                            ],
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "containersList",
+                          "objectType"
+                        ],
+                        "type": "object"
+                      },
+                      "kubernetesClusterBackupDatasourceParameters": {
+                        "description": "KubernetesCluster: Mutually exclusive with all other properties",
+                        "properties": {
+                          "backupHookReferences": {
+                            "description": "BackupHookReferences: Gets or sets the backup hook references. This property sets the hook reference to be executed\nduring backup.",
+                            "items": {
+                              "description": "Class to refer resources which contains namespace and name",
+                              "properties": {
+                                "name": {
+                                  "description": "Name: Name of the resource",
+                                  "type": "string"
+                                },
+                                "namespace": {
+                                  "description": "Namespace: Namespace in which the resource exists",
+                                  "type": "string"
+                                }
+                              },
+                              "type": "object"
+                            },
+                            "type": "array"
+                          },
+                          "excludedNamespaces": {
+                            "description": "ExcludedNamespaces: Gets or sets the exclude namespaces property. This property sets the namespaces to be excluded\nduring backup.",
+                            "items": {
+                              "type": "string"
+                            },
+                            "type": "array"
+                          },
+                          "excludedResourceTypes": {
+                            "description": "ExcludedResourceTypes: Gets or sets the exclude resource types property. This property sets the resource types to be\nexcluded during backup.",
+                            "items": {
+                              "type": "string"
+                            },
+                            "type": "array"
+                          },
+                          "includeClusterScopeResources": {
+                            "description": "IncludeClusterScopeResources: Gets or sets the include cluster resources property. This property if enabled will include\ncluster scope resources during backup.",
+                            "type": "boolean"
+                          },
+                          "includedNamespaces": {
+                            "description": "IncludedNamespaces: Gets or sets the include namespaces property. This property sets the namespaces to be included\nduring backup.",
+                            "items": {
+                              "type": "string"
+                            },
+                            "type": "array"
+                          },
+                          "includedResourceTypes": {
+                            "description": "IncludedResourceTypes: Gets or sets the include resource types property. This property sets the resource types to be\nincluded during backup.",
+                            "items": {
+                              "type": "string"
+                            },
+                            "type": "array"
+                          },
+                          "labelSelectors": {
+                            "description": "LabelSelectors: Gets or sets the LabelSelectors property. This property sets the resource with such label selectors to\nbe included during backup.",
+                            "items": {
+                              "type": "string"
+                            },
+                            "type": "array"
+                          },
+                          "objectType": {
+                            "description": "ObjectType: Type of the specific object - used for deserializing",
+                            "enum": [
+                              "KubernetesClusterBackupDatasourceParameters"
+                            ],
+                            "type": "string"
+                          },
+                          "snapshotVolumes": {
+                            "description": "SnapshotVolumes: Gets or sets the volume snapshot property. This property if enabled will take volume snapshots during\nbackup.",
+                            "type": "boolean"
+                          }
+                        },
+                        "required": [
+                          "includeClusterScopeResources",
+                          "objectType",
+                          "snapshotVolumes"
+                        ],
+                        "type": "object"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
+                "dataStoreParametersList": {
+                  "description": "DataStoreParametersList: Gets or sets the DataStore Parameters",
+                  "items": {
+                    "properties": {
+                      "azureOperationalStoreParameters": {
+                        "description": "AzureOperationalStoreParameters: Mutually exclusive with all other properties",
+                        "properties": {
+                          "dataStoreType": {
+                            "description": "DataStoreType: type of datastore; Operational/Vault/Archive",
+                            "enum": [
+                              "ArchiveStore",
+                              "OperationalStore",
+                              "VaultStore"
+                            ],
+                            "type": "string"
+                          },
+                          "objectType": {
+                            "description": "ObjectType: Type of the specific object - used for deserializing",
+                            "enum": [
+                              "AzureOperationalStoreParameters"
+                            ],
+                            "type": "string"
+                          },
+                          "resourceGroupReference": {
+                            "description": "ResourceGroupReference: Gets or sets the Snapshot Resource Group Uri.",
+                            "properties": {
+                              "armId": {
+                                "description": "ARMID is a string of the form /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}.\nThe /resourcegroups/{resourceGroupName} bit is optional as some resources are scoped at the subscription level\nARMID is mutually exclusive with Group, Kind, Namespace and Name.",
+                                "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+                                "type": "string"
+                              },
+                              "group": {
+                                "description": "Group is the Kubernetes group of the resource.",
+                                "type": "string"
+                              },
+                              "kind": {
+                                "description": "Kind is the Kubernetes kind of the resource.",
+                                "type": "string"
+                              },
+                              "name": {
+                                "description": "Name is the Kubernetes name of the resource.",
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          }
+                        },
+                        "required": [
+                          "dataStoreType",
+                          "objectType"
+                        ],
+                        "type": "object"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "type": "array"
+                }
+              },
+              "type": "object"
+            },
+            "policyReference": {
+              "description": "ResourceReference represents a resource reference, either to a Kubernetes resource or directly to an Azure resource via ARMID",
+              "properties": {
+                "armId": {
+                  "description": "ARMID is a string of the form /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}.\nThe /resourcegroups/{resourceGroupName} bit is optional as some resources are scoped at the subscription level\nARMID is mutually exclusive with Group, Kind, Namespace and Name.",
+                  "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+                  "type": "string"
+                },
+                "group": {
+                  "description": "Group is the Kubernetes group of the resource.",
+                  "type": "string"
+                },
+                "kind": {
+                  "description": "Kind is the Kubernetes kind of the resource.",
+                  "type": "string"
+                },
+                "name": {
+                  "description": "Name is the Kubernetes name of the resource.",
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "required": [
+            "policyReference"
+          ],
+          "type": "object"
+        },
+        "validationType": {
+          "description": "ValidationType: Specifies the type of validation. In case of DeepValidation, all validations from /validateForBackup API\nwill run again.",
+          "enum": [
+            "DeepValidation",
+            "ShallowValidation"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "dataSourceInfo",
+        "objectType",
+        "policyInfo"
+      ],
+      "type": "object"
+    },
+    "tags": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Tags: Proxy Resource tags.",
+      "type": "object"
+    }
+  },
+  "required": [
+    "owner"
+  ],
+  "title": "Azure Dataprotection BackupVaultsBackupInstance",
+  "type": "object"
+}

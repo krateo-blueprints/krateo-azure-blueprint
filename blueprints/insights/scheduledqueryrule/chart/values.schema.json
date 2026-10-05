@@ -1,0 +1,392 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "description": "Provision an Azure Insights ScheduledQueryRule via Azure Service Operator. Fields mirror the insights.azure.com/v1api20220615 ScheduledQueryRule spec.",
+  "properties": {
+    "actions": {
+      "description": "Actions: Actions to invoke when the alert fires.",
+      "properties": {
+        "actionGroupsReferences": {
+          "description": "ActionGroupsReferences: Action Group resource Ids to invoke when the alert fires.",
+          "items": {
+            "description": "ResourceReference represents a resource reference, either to a Kubernetes resource or directly to an Azure resource via ARMID",
+            "properties": {
+              "armId": {
+                "description": "ARMID is a string of the form /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}.\nThe /resourcegroups/{resourceGroupName} bit is optional as some resources are scoped at the subscription level\nARMID is mutually exclusive with Group, Kind, Namespace and Name.",
+                "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+                "type": "string"
+              },
+              "group": {
+                "description": "Group is the Kubernetes group of the resource.",
+                "type": "string"
+              },
+              "kind": {
+                "description": "Kind is the Kubernetes kind of the resource.",
+                "type": "string"
+              },
+              "name": {
+                "description": "Name is the Kubernetes name of the resource.",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "customProperties": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "CustomProperties: The properties of an alert payload.",
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "autoMitigate": {
+      "description": "AutoMitigate: The flag that indicates whether the alert should be automatically resolved or not. The default is true.\nRelevant only for rules of the kind LogAlert.",
+      "type": "boolean"
+    },
+    "azureName": {
+      "description": "AzureName: The name of the resource in Azure. This is often the same as the name of the resource in Kubernetes but it\ndoesn't have to be.",
+      "pattern": "^[^#\u003c\u003e%\u0026:\\?/{}*]{1,260}$",
+      "type": "string"
+    },
+    "checkWorkspaceAlertsStorageConfigured": {
+      "description": "CheckWorkspaceAlertsStorageConfigured: The flag which indicates whether this scheduled query rule should be stored in\nthe customer's storage. The default is false. Relevant only for rules of the kind LogAlert.",
+      "type": "boolean"
+    },
+    "credentialFrom": {
+      "default": "",
+      "description": "Name of a Kubernetes Secret holding the Azure credential to use for this resource. Rendered as the serviceoperator.azure.com/credential-from annotation. Leave empty to inherit the credential from the namespace, then from the operator's global credential. The resource's subscription and resource group come from spec.owner, not from this field.",
+      "title": "Azure credential Secret",
+      "type": "string"
+    },
+    "criteria": {
+      "description": "Criteria: The rule criteria that defines the conditions of the scheduled query rule.",
+      "properties": {
+        "allOf": {
+          "description": "AllOf: A list of conditions to evaluate against the specified scopes",
+          "items": {
+            "description": "A condition of the scheduled query rule.",
+            "properties": {
+              "dimensions": {
+                "description": "Dimensions: List of Dimensions conditions",
+                "items": {
+                  "description": "Dimension splitting and filtering definition",
+                  "properties": {
+                    "name": {
+                      "description": "Name: Name of the dimension",
+                      "type": "string"
+                    },
+                    "operator": {
+                      "description": "Operator: Operator for dimension values",
+                      "enum": [
+                        "Exclude",
+                        "Include"
+                      ],
+                      "type": "string"
+                    },
+                    "values": {
+                      "description": "Values: List of dimension values",
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "operator",
+                    "values"
+                  ],
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "failingPeriods": {
+                "description": "FailingPeriods: The minimum number of violations required within the selected lookback time window required to raise an\nalert. Relevant only for rules of the kind LogAlert.",
+                "properties": {
+                  "minFailingPeriodsToAlert": {
+                    "description": "MinFailingPeriodsToAlert: The number of violations to trigger an alert. Should be smaller or equal to\nnumberOfEvaluationPeriods. Default value is 1",
+                    "type": "integer"
+                  },
+                  "numberOfEvaluationPeriods": {
+                    "description": "NumberOfEvaluationPeriods: The number of aggregated lookback points. The lookback time window is calculated based on the\naggregation granularity (windowSize) and the selected number of aggregated points. Default value is 1",
+                    "type": "integer"
+                  }
+                },
+                "type": "object"
+              },
+              "metricMeasureColumn": {
+                "description": "MetricMeasureColumn: The column containing the metric measure number. Relevant only for rules of the kind LogAlert.",
+                "type": "string"
+              },
+              "metricName": {
+                "description": "MetricName: The name of the metric to be sent. Relevant and required only for rules of the kind LogToMetric.",
+                "type": "string"
+              },
+              "operator": {
+                "description": "Operator: The criteria operator. Relevant and required only for rules of the kind LogAlert.",
+                "enum": [
+                  "Equals",
+                  "GreaterThan",
+                  "GreaterThanOrEqual",
+                  "LessThan",
+                  "LessThanOrEqual"
+                ],
+                "type": "string"
+              },
+              "query": {
+                "description": "Query: Log query alert",
+                "type": "string"
+              },
+              "resourceIdColumnReference": {
+                "description": "ResourceIdColumnReference: The column containing the resource id. The content of the column must be a uri formatted as\nresource id. Relevant only for rules of the kind LogAlert.",
+                "properties": {
+                  "armId": {
+                    "description": "ARMID is a string of the form /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}.\nThe /resourcegroups/{resourceGroupName} bit is optional as some resources are scoped at the subscription level\nARMID is mutually exclusive with Group, Kind, Namespace and Name.",
+                    "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+                    "type": "string"
+                  },
+                  "group": {
+                    "description": "Group is the Kubernetes group of the resource.",
+                    "type": "string"
+                  },
+                  "kind": {
+                    "description": "Kind is the Kubernetes kind of the resource.",
+                    "type": "string"
+                  },
+                  "name": {
+                    "description": "Name is the Kubernetes name of the resource.",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "threshold": {
+                "description": "Threshold: the criteria threshold value that activates the alert. Relevant and required only for rules of the kind\nLogAlert.",
+                "type": "number"
+              },
+              "timeAggregation": {
+                "description": "TimeAggregation: Aggregation type. Relevant and required only for rules of the kind LogAlert.",
+                "enum": [
+                  "Average",
+                  "Count",
+                  "Maximum",
+                  "Minimum",
+                  "Total"
+                ],
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "description": {
+      "description": "Description: The description of the scheduled query rule.",
+      "type": "string"
+    },
+    "displayName": {
+      "description": "DisplayName: The display name of the alert rule",
+      "type": "string"
+    },
+    "enabled": {
+      "description": "Enabled: The flag which indicates whether this scheduled query rule is enabled. Value should be true or false",
+      "type": "boolean"
+    },
+    "evaluationFrequency": {
+      "description": "EvaluationFrequency: How often the scheduled query rule is evaluated represented in ISO 8601 duration format. Relevant\nand required only for rules of the kind LogAlert.",
+      "type": "string"
+    },
+    "kind": {
+      "description": "Kind: Indicates the type of scheduled query rule. The default is LogAlert.",
+      "enum": [
+        "LogAlert",
+        "LogToMetric"
+      ],
+      "type": "string"
+    },
+    "location": {
+      "description": "Location: The geo-location where the resource lives",
+      "type": "string"
+    },
+    "muteActionsDuration": {
+      "description": "MuteActionsDuration: Mute actions for the chosen period of time (in ISO 8601 duration format) after the alert is fired.\nRelevant only for rules of the kind LogAlert.",
+      "type": "string"
+    },
+    "operatorSpec": {
+      "description": "OperatorSpec: The specification for configuring operator behavior. This field is interpreted by the operator and not\npassed directly to Azure",
+      "properties": {
+        "configMapExpressions": {
+          "description": "ConfigMapExpressions: configures where to place operator written dynamic ConfigMaps (created with CEL expressions).",
+          "items": {
+            "description": "DestinationExpression is a CEL expression and a destination to store the result in. The destination may\nbe a secret or a configmap. The value of the expression is stored at the specified location in\nthe destination.",
+            "properties": {
+              "annotations": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Annotations is an optional set of annotations to apply to the destination resource.",
+                "type": "object"
+              },
+              "key": {
+                "description": "Key is the key in the ConfigMap or Secret being written to. If the CEL expression in Value returns a string\nthis is required to identify what key to write to. If the CEL expression in Value returns a map[string]string\nKey must not be set, instead the keys written will be determined dynamically based on the keys of the resulting\nmap[string]string.",
+                "type": "string"
+              },
+              "labels": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Labels is an optional set of labels to apply to the destination resource.",
+                "type": "object"
+              },
+              "name": {
+                "description": "Name is the name of the Kubernetes configmap or secret to write to.\nThe configmap or secret will be created in the same namespace as the resource.",
+                "type": "string"
+              },
+              "value": {
+                "description": "Value is a CEL expression. The CEL expression may return a string or a map[string]string. For more information\non CEL in ASO see https://azure.github.io/azure-service-operator/guide/expressions/",
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "value"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "secretExpressions": {
+          "description": "SecretExpressions: configures where to place operator written dynamic secrets (created with CEL expressions).",
+          "items": {
+            "description": "DestinationExpression is a CEL expression and a destination to store the result in. The destination may\nbe a secret or a configmap. The value of the expression is stored at the specified location in\nthe destination.",
+            "properties": {
+              "annotations": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Annotations is an optional set of annotations to apply to the destination resource.",
+                "type": "object"
+              },
+              "key": {
+                "description": "Key is the key in the ConfigMap or Secret being written to. If the CEL expression in Value returns a string\nthis is required to identify what key to write to. If the CEL expression in Value returns a map[string]string\nKey must not be set, instead the keys written will be determined dynamically based on the keys of the resulting\nmap[string]string.",
+                "type": "string"
+              },
+              "labels": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Labels is an optional set of labels to apply to the destination resource.",
+                "type": "object"
+              },
+              "name": {
+                "description": "Name is the name of the Kubernetes configmap or secret to write to.\nThe configmap or secret will be created in the same namespace as the resource.",
+                "type": "string"
+              },
+              "value": {
+                "description": "Value is a CEL expression. The CEL expression may return a string or a map[string]string. For more information\non CEL in ASO see https://azure.github.io/azure-service-operator/guide/expressions/",
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "value"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "overrideQueryTimeRange": {
+      "description": "OverrideQueryTimeRange: If specified then overrides the query time range (default is\nWindowSize*NumberOfEvaluationPeriods). Relevant only for rules of the kind LogAlert.",
+      "type": "string"
+    },
+    "owner": {
+      "description": "Owner: The owner of the resource. The owner controls where the resource goes when it is deployed. The owner also\ncontrols the resources lifecycle. When the owner is deleted the resource will also be deleted. Owner is expected to be a\nreference to a resources.azure.com/ResourceGroup resource",
+      "properties": {
+        "armId": {
+          "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+          "type": "string"
+        },
+        "name": {
+          "description": "This is the name of the Kubernetes resource to reference.",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "scopesReferences": {
+      "description": "ScopesReferences: The list of resource id's that this scheduled query rule is scoped to.",
+      "items": {
+        "description": "ResourceReference represents a resource reference, either to a Kubernetes resource or directly to an Azure resource via ARMID",
+        "properties": {
+          "armId": {
+            "description": "ARMID is a string of the form /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}.\nThe /resourcegroups/{resourceGroupName} bit is optional as some resources are scoped at the subscription level\nARMID is mutually exclusive with Group, Kind, Namespace and Name.",
+            "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+            "type": "string"
+          },
+          "group": {
+            "description": "Group is the Kubernetes group of the resource.",
+            "type": "string"
+          },
+          "kind": {
+            "description": "Kind is the Kubernetes kind of the resource.",
+            "type": "string"
+          },
+          "name": {
+            "description": "Name is the Kubernetes name of the resource.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "severity": {
+      "description": "Severity: Severity of the alert. Should be an integer between [0-4]. Value of 0 is severest. Relevant and required only\nfor rules of the kind LogAlert.",
+      "enum": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "type": "integer"
+    },
+    "skipQueryValidation": {
+      "description": "SkipQueryValidation: The flag which indicates whether the provided query should be validated or not. The default is\nfalse. Relevant only for rules of the kind LogAlert.",
+      "type": "boolean"
+    },
+    "tags": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Tags: Resource tags.",
+      "type": "object"
+    },
+    "targetResourceTypes": {
+      "description": "TargetResourceTypes: List of resource type of the target resource(s) on which the alert is created/updated. For example\nif the scope is a resource group and targetResourceTypes is Microsoft.Compute/virtualMachines, then a different alert\nwill be fired for each virtual machine in the resource group which meet the alert criteria. Relevant only for rules of\nthe kind LogAlert",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "windowSize": {
+      "description": "WindowSize: The period of time (in ISO 8601 duration format) on which the Alert query will be executed (bin size).\nRelevant and required only for rules of the kind LogAlert.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "location",
+    "owner"
+  ],
+  "title": "Azure Insights ScheduledQueryRule",
+  "type": "object"
+}

@@ -1,0 +1,458 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "description": "Provision an Azure Synapse Workspace via Azure Service Operator. Fields mirror the synapse.azure.com/v1api20210601 Workspace spec.",
+  "properties": {
+    "azureADOnlyAuthentication": {
+      "description": "AzureADOnlyAuthentication: Enable or Disable AzureADOnlyAuthentication on All Workspace subresource",
+      "type": "boolean"
+    },
+    "azureName": {
+      "description": "AzureName: The name of the resource in Azure. This is often the same as the name of the resource in Kubernetes but it\ndoesn't have to be.",
+      "type": "string"
+    },
+    "credentialFrom": {
+      "default": "",
+      "description": "Name of a Kubernetes Secret holding the Azure credential to use for this resource. Rendered as the serviceoperator.azure.com/credential-from annotation. Leave empty to inherit the credential from the namespace, then from the operator's global credential. The resource's subscription and resource group come from spec.owner, not from this field.",
+      "title": "Azure credential Secret",
+      "type": "string"
+    },
+    "cspWorkspaceAdminProperties": {
+      "description": "CspWorkspaceAdminProperties: Initial workspace AAD admin properties for a CSP subscription",
+      "properties": {
+        "initialWorkspaceAdminObjectId": {
+          "description": "InitialWorkspaceAdminObjectId: AAD object ID of initial workspace admin",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "defaultDataLakeStorage": {
+      "description": "DefaultDataLakeStorage: Workspace default data lake storage account details",
+      "properties": {
+        "accountUrl": {
+          "description": "AccountUrl: Account URL",
+          "type": "string"
+        },
+        "accountUrlFromConfig": {
+          "description": "AccountUrlFromConfig: Account URL",
+          "properties": {
+            "key": {
+              "description": "Key is the key in the Kubernetes configmap being referenced",
+              "type": "string"
+            },
+            "name": {
+              "description": "Name is the name of the Kubernetes configmap being referenced.\nThe configmap must be in the same namespace as the resource",
+              "type": "string"
+            }
+          },
+          "required": [
+            "key",
+            "name"
+          ],
+          "type": "object"
+        },
+        "createManagedPrivateEndpoint": {
+          "description": "CreateManagedPrivateEndpoint: Create managed private endpoint to this storage account or not",
+          "type": "boolean"
+        },
+        "filesystem": {
+          "description": "Filesystem: Filesystem name",
+          "type": "string"
+        },
+        "resourceReference": {
+          "description": "ResourceReference: ARM resource Id of this storage account",
+          "properties": {
+            "armId": {
+              "description": "ARMID is a string of the form /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}.\nThe /resourcegroups/{resourceGroupName} bit is optional as some resources are scoped at the subscription level\nARMID is mutually exclusive with Group, Kind, Namespace and Name.",
+              "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+              "type": "string"
+            },
+            "group": {
+              "description": "Group is the Kubernetes group of the resource.",
+              "type": "string"
+            },
+            "kind": {
+              "description": "Kind is the Kubernetes kind of the resource.",
+              "type": "string"
+            },
+            "name": {
+              "description": "Name is the Kubernetes name of the resource.",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "encryption": {
+      "description": "Encryption: The encryption details of the workspace",
+      "properties": {
+        "cmk": {
+          "description": "Cmk: Customer Managed Key Details",
+          "properties": {
+            "kekIdentity": {
+              "description": "KekIdentity: Key encryption key",
+              "properties": {
+                "useSystemAssignedIdentity": {
+                  "description": "UseSystemAssignedIdentity: Boolean specifying whether to use system assigned identity or not",
+                  "type": "boolean"
+                },
+                "userAssignedIdentityReference": {
+                  "description": "UserAssignedIdentityReference: User assigned identity resource Id",
+                  "properties": {
+                    "armId": {
+                      "description": "ARMID is a string of the form /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}.\nThe /resourcegroups/{resourceGroupName} bit is optional as some resources are scoped at the subscription level\nARMID is mutually exclusive with Group, Kind, Namespace and Name.",
+                      "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+                      "type": "string"
+                    },
+                    "group": {
+                      "description": "Group is the Kubernetes group of the resource.",
+                      "type": "string"
+                    },
+                    "kind": {
+                      "description": "Kind is the Kubernetes kind of the resource.",
+                      "type": "string"
+                    },
+                    "name": {
+                      "description": "Name is the Kubernetes name of the resource.",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              },
+              "type": "object"
+            },
+            "key": {
+              "description": "Key: The key object of the workspace",
+              "properties": {
+                "keyVaultUrl": {
+                  "description": "KeyVaultUrl: Workspace Key sub-resource key vault url",
+                  "type": "string"
+                },
+                "name": {
+                  "description": "Name: Workspace Key sub-resource name",
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "identity": {
+      "description": "Identity: Identity of the workspace",
+      "properties": {
+        "type": {
+          "description": "Type: The type of managed identity for the workspace",
+          "enum": [
+            "None",
+            "SystemAssigned",
+            "SystemAssigned,UserAssigned"
+          ],
+          "type": "string"
+        },
+        "userAssignedIdentities": {
+          "description": "UserAssignedIdentities: The user assigned managed identities.",
+          "items": {
+            "description": "Information about the user assigned identity for the resource",
+            "properties": {
+              "reference": {
+                "description": "ResourceReference represents a resource reference, either to a Kubernetes resource or directly to an Azure resource via ARMID",
+                "properties": {
+                  "armId": {
+                    "description": "ARMID is a string of the form /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}.\nThe /resourcegroups/{resourceGroupName} bit is optional as some resources are scoped at the subscription level\nARMID is mutually exclusive with Group, Kind, Namespace and Name.",
+                    "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+                    "type": "string"
+                  },
+                  "group": {
+                    "description": "Group is the Kubernetes group of the resource.",
+                    "type": "string"
+                  },
+                  "kind": {
+                    "description": "Kind is the Kubernetes kind of the resource.",
+                    "type": "string"
+                  },
+                  "name": {
+                    "description": "Name is the Kubernetes name of the resource.",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "location": {
+      "description": "Location: The geo-location where the resource lives",
+      "type": "string"
+    },
+    "managedResourceGroupName": {
+      "description": "ManagedResourceGroupName: Workspace managed resource group. The resource group name uniquely identifies the resource\ngroup within the user subscriptionId. The resource group name must be no longer than 90 characters long, and must be\nalphanumeric characters (Char.IsLetterOrDigit()) and '-', '_', '(', ')' and'.'. Note that the name cannot end with '.'",
+      "type": "string"
+    },
+    "managedVirtualNetwork": {
+      "description": "ManagedVirtualNetwork: Setting this to 'default' will ensure that all compute for this workspace is in a virtual network\nmanaged on behalf of the user.",
+      "type": "string"
+    },
+    "managedVirtualNetworkSettings": {
+      "description": "ManagedVirtualNetworkSettings: Managed Virtual Network Settings",
+      "properties": {
+        "allowedAadTenantIdsForLinking": {
+          "description": "AllowedAadTenantIdsForLinking: Allowed Aad Tenant Ids For Linking",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "linkedAccessCheckOnTargetResource": {
+          "description": "LinkedAccessCheckOnTargetResource: Linked Access Check On Target Resource",
+          "type": "boolean"
+        },
+        "preventDataExfiltration": {
+          "description": "PreventDataExfiltration: Prevent Data Exfiltration",
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "operatorSpec": {
+      "description": "OperatorSpec: The specification for configuring operator behavior. This field is interpreted by the operator and not\npassed directly to Azure",
+      "properties": {
+        "configMapExpressions": {
+          "description": "ConfigMapExpressions: configures where to place operator written dynamic ConfigMaps (created with CEL expressions).",
+          "items": {
+            "description": "DestinationExpression is a CEL expression and a destination to store the result in. The destination may\nbe a secret or a configmap. The value of the expression is stored at the specified location in\nthe destination.",
+            "properties": {
+              "annotations": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Annotations is an optional set of annotations to apply to the destination resource.",
+                "type": "object"
+              },
+              "key": {
+                "description": "Key is the key in the ConfigMap or Secret being written to. If the CEL expression in Value returns a string\nthis is required to identify what key to write to. If the CEL expression in Value returns a map[string]string\nKey must not be set, instead the keys written will be determined dynamically based on the keys of the resulting\nmap[string]string.",
+                "type": "string"
+              },
+              "labels": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Labels is an optional set of labels to apply to the destination resource.",
+                "type": "object"
+              },
+              "name": {
+                "description": "Name is the name of the Kubernetes configmap or secret to write to.\nThe configmap or secret will be created in the same namespace as the resource.",
+                "type": "string"
+              },
+              "value": {
+                "description": "Value is a CEL expression. The CEL expression may return a string or a map[string]string. For more information\non CEL in ASO see https://azure.github.io/azure-service-operator/guide/expressions/",
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "value"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "secretExpressions": {
+          "description": "SecretExpressions: configures where to place operator written dynamic secrets (created with CEL expressions).",
+          "items": {
+            "description": "DestinationExpression is a CEL expression and a destination to store the result in. The destination may\nbe a secret or a configmap. The value of the expression is stored at the specified location in\nthe destination.",
+            "properties": {
+              "annotations": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Annotations is an optional set of annotations to apply to the destination resource.",
+                "type": "object"
+              },
+              "key": {
+                "description": "Key is the key in the ConfigMap or Secret being written to. If the CEL expression in Value returns a string\nthis is required to identify what key to write to. If the CEL expression in Value returns a map[string]string\nKey must not be set, instead the keys written will be determined dynamically based on the keys of the resulting\nmap[string]string.",
+                "type": "string"
+              },
+              "labels": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Labels is an optional set of labels to apply to the destination resource.",
+                "type": "object"
+              },
+              "name": {
+                "description": "Name is the name of the Kubernetes configmap or secret to write to.\nThe configmap or secret will be created in the same namespace as the resource.",
+                "type": "string"
+              },
+              "value": {
+                "description": "Value is a CEL expression. The CEL expression may return a string or a map[string]string. For more information\non CEL in ASO see https://azure.github.io/azure-service-operator/guide/expressions/",
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "value"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "owner": {
+      "description": "Owner: The owner of the resource. The owner controls where the resource goes when it is deployed. The owner also\ncontrols the resources lifecycle. When the owner is deleted the resource will also be deleted. Owner is expected to be a\nreference to a resources.azure.com/ResourceGroup resource",
+      "properties": {
+        "armId": {
+          "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+          "type": "string"
+        },
+        "name": {
+          "description": "This is the name of the Kubernetes resource to reference.",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "publicNetworkAccess": {
+      "description": "PublicNetworkAccess: Enable or Disable public network access to workspace",
+      "enum": [
+        "Disabled",
+        "Enabled"
+      ],
+      "type": "string"
+    },
+    "purviewConfiguration": {
+      "description": "PurviewConfiguration: Purview Configuration",
+      "properties": {
+        "purviewResourceReference": {
+          "description": "PurviewResourceReference: Purview Resource ID",
+          "properties": {
+            "armId": {
+              "description": "ARMID is a string of the form /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}.\nThe /resourcegroups/{resourceGroupName} bit is optional as some resources are scoped at the subscription level\nARMID is mutually exclusive with Group, Kind, Namespace and Name.",
+              "pattern": "(?i)(^(/subscriptions/([^/]+)(/resourcegroups/([^/]+))?)?/providers/([^/]+)/([^/]+/[^/]+)(/([^/]+/[^/]+))*$|^/subscriptions/([^/]+)(/resourcegroups/([^/]+))?$)",
+              "type": "string"
+            },
+            "group": {
+              "description": "Group is the Kubernetes group of the resource.",
+              "type": "string"
+            },
+            "kind": {
+              "description": "Kind is the Kubernetes kind of the resource.",
+              "type": "string"
+            },
+            "name": {
+              "description": "Name is the Kubernetes name of the resource.",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "sqlAdministratorLogin": {
+      "description": "SqlAdministratorLogin: Login for workspace SQL active directory administrator",
+      "type": "string"
+    },
+    "sqlAdministratorLoginPassword": {
+      "description": "SqlAdministratorLoginPassword: SQL administrator login password",
+      "properties": {
+        "key": {
+          "description": "Key is the key in the Kubernetes secret being referenced",
+          "type": "string"
+        },
+        "name": {
+          "description": "Name is the name of the Kubernetes secret being referenced.\nThe secret must be in the same namespace as the resource",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key",
+        "name"
+      ],
+      "type": "object"
+    },
+    "tags": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Tags: Resource tags.",
+      "type": "object"
+    },
+    "trustedServiceBypassEnabled": {
+      "description": "TrustedServiceBypassEnabled: Is trustedServiceBypassEnabled for the workspace",
+      "type": "boolean"
+    },
+    "virtualNetworkProfile": {
+      "description": "VirtualNetworkProfile: Virtual Network profile",
+      "properties": {
+        "computeSubnetId": {
+          "description": "ComputeSubnetId: Subnet ID used for computes in workspace",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "workspaceRepositoryConfiguration": {
+      "description": "WorkspaceRepositoryConfiguration: Git integration settings",
+      "properties": {
+        "accountName": {
+          "description": "AccountName: Account name",
+          "type": "string"
+        },
+        "collaborationBranch": {
+          "description": "CollaborationBranch: Collaboration branch",
+          "type": "string"
+        },
+        "hostName": {
+          "description": "HostName: GitHub Enterprise host name. For example: `https://github.mydomain.com`",
+          "type": "string"
+        },
+        "lastCommitId": {
+          "description": "LastCommitId: The last commit ID",
+          "type": "string"
+        },
+        "projectName": {
+          "description": "ProjectName: VSTS project name",
+          "type": "string"
+        },
+        "repositoryName": {
+          "description": "RepositoryName: Repository name",
+          "type": "string"
+        },
+        "rootFolder": {
+          "description": "RootFolder: Root folder to use in the repository",
+          "type": "string"
+        },
+        "tenantId": {
+          "description": "TenantId: The VSTS tenant ID",
+          "pattern": "^[0-9a-fA-F]{8}(-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}$",
+          "type": "string"
+        },
+        "type": {
+          "description": "Type: Type of workspace repositoryID configuration. Example WorkspaceVSTSConfiguration, WorkspaceGitHubConfiguration",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "required": [
+    "location",
+    "owner"
+  ],
+  "title": "Azure Synapse Workspace",
+  "type": "object"
+}

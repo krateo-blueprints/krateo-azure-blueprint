@@ -1,0 +1,90 @@
+apiVersion: v1
+data:
+  drawer: "true"
+  form: "true"
+  showFormStructure: "true"
+  drawerSize: large
+kind: ConfigMap
+metadata:
+  name: template-azure-containerregistry-registrycacherule-card
+  namespace: azure-containerregistry-system
+---
+apiVersion: templates.krateo.io/v1alpha1
+kind: Widget
+metadata:
+  name: template-azure-containerregistry-registrycacherule-card
+  namespace: azure-containerregistry-system
+spec:
+  actions:
+  - template:
+      apiVersion: templates.krateo.io/v1alpha1
+      name: template-azure-containerregistry-registrycacherule-customform
+      namespace: azure-containerregistry-system
+      resource: customforms
+      verb: GET
+  - template:
+      apiVersion: core.krateo.io/v1alpha1
+      name: azure-containerregistry-registrycacherule
+      namespace: azure-containerregistry-system
+      resource: compositiondefinitions
+      verb: DELETE
+  app:
+    template:
+      color: ${ .getCompositionDefinition.status.conditions[] | select(.type == "Ready") | if .status == "False" then "orange" elif .status == "True" then "green" else "grey" end }
+      content: Provision an Azure Containerregistry RegistryCacheRule via Azure Service Operator.
+      icon: fa-brands fa-microsoft
+      tags: azure-containerregistry-system,0.1.0
+      title: azure-containerregistry-registrycacherule
+      status: ${ .getCompositionDefinition.status.conditions[] | select(.type == "Ready") | "Ready:" + .status }
+      date: ${ .getCompositionDefinition.metadata.creationTimestamp }
+  propsRef:
+    name: template-azure-containerregistry-registrycacherule-card
+    namespace: azure-containerregistry-system
+  type: card
+  api:
+  - name: getCompositionDefinition
+    path: "/apis/core.krateo.io/v1alpha1/namespaces/azure-containerregistry-system/compositiondefinitions/azure-containerregistry-registrycacherule"
+    verb: GET
+    headers:
+    - 'Accept: application/json'
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: template-azure-containerregistry-registrycacherule-customform
+  namespace: azure-containerregistry-system
+data:
+  onSubmitId: submit
+  onSubmitVerb: POST
+  payloadFormKey: spec
+  redirectRoute: /compositions/${metadata.namespace}/${metadata.name}
+  redirectTimeout: "50"
+---
+apiVersion: templates.krateo.io/v1alpha1
+kind: CustomForm
+metadata:
+  name: template-azure-containerregistry-registrycacherule-customform
+  namespace: azure-containerregistry-system
+spec:
+  type: customform
+  propsRef:
+    name: template-azure-containerregistry-registrycacherule-customform
+    namespace: azure-containerregistry-system
+  actions:
+    - template:
+        id: submit
+        apiVersion: composition.krateo.io/v0-1-0
+        verb: POST
+        resource: azurecontainerregistryregistrycacherules
+        payloadToOverride:
+        - name: metadata.namespace
+          value: ${ "azure-containerregistry-system" }
+  app:
+    template:
+      schema: ${ .getCRD | .spec.versions[] | select(.name == "v0-1-0") | .schema.openAPIV3Schema.properties.spec }
+  api:
+  - name: getCRD
+    path: "/apis/apiextensions.k8s.io/v1/customresourcedefinitions/azurecontainerregistryregistrycacherules.composition.krateo.io"
+    verb: GET
+    headers:
+    - 'Accept: application/json'

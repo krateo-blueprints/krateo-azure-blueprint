@@ -1,0 +1,90 @@
+apiVersion: v1
+data:
+  drawer: "true"
+  form: "true"
+  showFormStructure: "true"
+  drawerSize: large
+kind: ConfigMap
+metadata:
+  name: template-azure-dbforpostgresql-flexibleserversadministrator-card
+  namespace: azure-dbforpostgresql-system
+---
+apiVersion: templates.krateo.io/v1alpha1
+kind: Widget
+metadata:
+  name: template-azure-dbforpostgresql-flexibleserversadministrator-card
+  namespace: azure-dbforpostgresql-system
+spec:
+  actions:
+  - template:
+      apiVersion: templates.krateo.io/v1alpha1
+      name: template-azure-dbforpostgresql-flexibleserversadministrator-customform
+      namespace: azure-dbforpostgresql-system
+      resource: customforms
+      verb: GET
+  - template:
+      apiVersion: core.krateo.io/v1alpha1
+      name: azure-dbforpostgresql-flexibleserversadministrator
+      namespace: azure-dbforpostgresql-system
+      resource: compositiondefinitions
+      verb: DELETE
+  app:
+    template:
+      color: ${ .getCompositionDefinition.status.conditions[] | select(.type == "Ready") | if .status == "False" then "orange" elif .status == "True" then "green" else "grey" end }
+      content: Provision an Azure Dbforpostgresql FlexibleServersAdministrator via Azure Service Operator.
+      icon: fa-brands fa-microsoft
+      tags: azure-dbforpostgresql-system,0.1.0
+      title: azure-dbforpostgresql-flexibleserversadministrator
+      status: ${ .getCompositionDefinition.status.conditions[] | select(.type == "Ready") | "Ready:" + .status }
+      date: ${ .getCompositionDefinition.metadata.creationTimestamp }
+  propsRef:
+    name: template-azure-dbforpostgresql-flexibleserversadministrator-card
+    namespace: azure-dbforpostgresql-system
+  type: card
+  api:
+  - name: getCompositionDefinition
+    path: "/apis/core.krateo.io/v1alpha1/namespaces/azure-dbforpostgresql-system/compositiondefinitions/azure-dbforpostgresql-flexibleserversadministrator"
+    verb: GET
+    headers:
+    - 'Accept: application/json'
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: template-azure-dbforpostgresql-flexibleserversadministrator-customform
+  namespace: azure-dbforpostgresql-system
+data:
+  onSubmitId: submit
+  onSubmitVerb: POST
+  payloadFormKey: spec
+  redirectRoute: /compositions/${metadata.namespace}/${metadata.name}
+  redirectTimeout: "50"
+---
+apiVersion: templates.krateo.io/v1alpha1
+kind: CustomForm
+metadata:
+  name: template-azure-dbforpostgresql-flexibleserversadministrator-customform
+  namespace: azure-dbforpostgresql-system
+spec:
+  type: customform
+  propsRef:
+    name: template-azure-dbforpostgresql-flexibleserversadministrator-customform
+    namespace: azure-dbforpostgresql-system
+  actions:
+    - template:
+        id: submit
+        apiVersion: composition.krateo.io/v0-1-0
+        verb: POST
+        resource: azuredbforpostgresqlflexibleserversadministrators
+        payloadToOverride:
+        - name: metadata.namespace
+          value: ${ "azure-dbforpostgresql-system" }
+  app:
+    template:
+      schema: ${ .getCRD | .spec.versions[] | select(.name == "v0-1-0") | .schema.openAPIV3Schema.properties.spec }
+  api:
+  - name: getCRD
+    path: "/apis/apiextensions.k8s.io/v1/customresourcedefinitions/azuredbforpostgresqlflexibleserversadministrators.composition.krateo.io"
+    verb: GET
+    headers:
+    - 'Accept: application/json'

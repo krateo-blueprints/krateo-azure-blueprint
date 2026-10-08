@@ -1,0 +1,37 @@
+# Values forwarded to the upstream azure-service-operator chart. Only the knobs a Krateo
+# Composition needs are surfaced; everything else keeps the upstream default.
+#
+# Nothing here is REQUIRED at the schema's root. A root-level `required` in a blueprint chart's
+# values.schema.json becomes a mandatory field on every Composition CR of this type, and the
+# installer emits a Composition carrying only the componentValues it was hand-given — so a missing
+# key is rejected by the apiserver INSIDE the Installer composition's own reconcile, which stalls
+# every other component behind it. Defaults live here instead.
+azure-service-operator:
+  # Credentials for the operator's default identity. Leave empty and supply them through a
+  # pre-existing Secret, or set useWorkloadIdentityAuth when running with a federated identity.
+  # Per-resource credentials are wired on the resource itself via credentialFrom, so these are the
+  # cluster-wide fallback rather than the only way in.
+  azureTenantID: ""
+  azureSubscriptionID: ""
+  azureClientID: ""
+  azureClientSecret: ""
+
+  # true when the operator should authenticate as a workload identity instead of a client secret.
+  useWorkloadIdentityAuth: false
+
+  # Create the aso-controller-settings Secret from the values above. Set false when the Secret is
+  # managed outside this chart; the operator then expects it to exist already.
+  createAzureOperatorSecret: true
+
+  # ASO installs and manages its resource CRDs itself, which is why this repo ships no -crds chart.
+  installCRDs: true
+
+  # Which CRDs to install, semicolon-delimited globs. EMPTY INSTALLS NOTHING on a fresh install:
+  # upstream leaves the operator with no resource CRDs at all, so every blueprint here would stay
+  # unreconciled with no error. Set it to the groups you use, e.g.
+  #   "resources.azure.com/*;containerservice.azure.com/*;storage.azure.com/*"
+  # or "*" for all 293. Scoping it keeps the apiserver's CRD count down.
+  crdPattern: ""
+
+  # Restrict the operator to these namespaces. Empty watches the whole cluster.
+  azureTargetNamespaces: []

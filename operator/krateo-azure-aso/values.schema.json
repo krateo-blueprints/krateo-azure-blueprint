@@ -1,0 +1,55 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "krateo-azure-aso",
+  "description": "Azure Service Operator v2, wrapped for Krateo. Values are forwarded to the upstream azure-service-operator chart.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "azure-service-operator": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Forwarded verbatim to the upstream chart; keys not listed here keep the upstream default.",
+      "properties": {
+        "azureTenantID": {
+          "type": "string",
+          "description": "Entra tenant ID for the operator's default identity."
+        },
+        "azureSubscriptionID": {
+          "type": "string",
+          "description": "Default Azure subscription ID."
+        },
+        "azureClientID": {
+          "type": "string",
+          "description": "Client (application) ID of the operator's identity."
+        },
+        "azureClientSecret": {
+          "type": "string",
+          "description": "Client secret. Prefer useWorkloadIdentityAuth, or an externally managed Secret."
+        },
+        "useWorkloadIdentityAuth": {
+          "type": "boolean",
+          "description": "Authenticate as a federated workload identity instead of a client secret."
+        },
+        "createAzureOperatorSecret": {
+          "type": "boolean",
+          "description": "Create aso-controller-settings from the values above."
+        },
+        "installCRDs": {
+          "type": "boolean",
+          "description": "Let the operator install and manage its resource CRDs. ASO does this at runtime, which is why no -crds chart ships here."
+        },
+        "crdPattern": {
+          "type": "string",
+          "description": "Semicolon-delimited CRD globs to install. EMPTY INSTALLS NOTHING on a fresh install; use '*' for all 293 or scope to the groups you need."
+        },
+        "azureTargetNamespaces": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Namespaces to watch. Empty watches the whole cluster."
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,6 @@
+dependencies:
+- name: azure-service-operator
+  repository: https://raw.githubusercontent.com/Azure/azure-service-operator/main/v2/charts
+  version: 2.21.1
+digest: sha256:2f28fd7cbadd61d9a61c5a3727a8b8c776043168b16b5d575a0995615843100f
+generated: "2026-10-08T09:49:47.035729+02:00"

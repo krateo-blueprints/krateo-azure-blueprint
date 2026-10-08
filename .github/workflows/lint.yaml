@@ -23,6 +23,13 @@ jobs:
             n=$((n+1))
             tmp=$(mktemp -d); cp -r "${chart}" "${tmp}/chart"
             sed -i "s/CHART_VERSION/0.0.0-ci/g" "${tmp}/chart/Chart.yaml"
+            # krateo-azure-aso WRAPS the upstream azure-service-operator chart. helm template
+            # cannot render a chart whose declared dependency is absent, and the vendored
+            # tarball is gitignored, so it has to be restored here. `build` honours Chart.lock's
+            # pinned digest; `update` would re-resolve and could drift from the lock.
+            if grep -q "^dependencies:" "${tmp}/chart/Chart.yaml"; then
+              helm dependency build "${tmp}/chart" >/dev/null
+            fi
             if ! out=$(helm template release "${tmp}/chart" --namespace ci 2>&1); then
               echo "::error::${chart}"; echo "${out}" | tail -5; fail=$((fail+1))
             fi

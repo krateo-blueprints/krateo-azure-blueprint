@@ -17,6 +17,8 @@ permissions:
 jobs:
   package-and-push:
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.resolve.outputs.version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -25,9 +27,14 @@ jobs:
         uses: azure/setup-helm@v4
 
       - name: Resolve version and registry
+        id: resolve
         run: |
           echo "VERSION=${GITHUB_REF_NAME}" >> "$GITHUB_ENV"
           echo "OCI_REPO=oci://ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/charts" >> "$GITHUB_ENV"
+          echo "version=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+          # Collected for publish-chart.yaml: the Marketplace index is built from the .tgz this
+          # run uploads, NOT from the OCI registry, so charts pushed only to GHCR stay invisible.
+          mkdir -p "${RUNNER_TEMP}/charts-dist"
 
       - name: Log in to GHCR
         run: |
@@ -71,6 +78,8 @@ jobs:
               exit 1
             fi
             echo "Published ${OCI_REPO}/${name}:${VERSION}"
+            # Same bytes to the publisher.
+            cp "${name}-${VERSION}.tgz" "${RUNNER_TEMP}/charts-dist/"
             published=$((published+1))
             echo "::endgroup::"
           done
@@ -81,3 +90,28 @@ jobs:
             echo "::error::no charts published — the chart glob matched nothing"
             exit 1
           fi
+
+      - name: Upload packaged charts for the publisher
+        uses: actions/upload-artifact@v4
+        with:
+          # Name and layout (.tgz at the artifact root) are what publish-chart.yaml downloads.
+          name: charts-dist
+          path: ${{ runner.temp }}/charts-dist/*.tgz
+          if-no-files-found: error
+          retention-days: 1
+
+  # krateo-blueprints/charts uploads each package to its Releases and merges its entry into the
+  # blueprints channel index on gh-pages, which the Marketplace reads. Only the blueprints channel:
+  # this repo has no operator/ directory, and an operators upload with if-no-files-found: error
+  # would fail the job on an empty glob.
+  publish-blueprints:
+    needs: package-and-push
+    uses: krateo-blueprints/charts/.github/workflows/publish-chart.yaml@main
+    permissions:
+      contents: read
+    with:
+      source_repo: ${{ github.repository }}
+      git_tag: ${{ needs.package-and-push.outputs.version }}
+      channel: blueprints
+    secrets:
+      PUBLISH_TOKEN: ${{ secrets.CHARTS_PUBLISH_TOKEN || secrets.RELEASE_FEED_TOKEN }}

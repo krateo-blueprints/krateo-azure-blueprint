@@ -61,15 +61,18 @@ jobs:
           # row died before reaching it.
           for chart in operator/* blueprints/*/*/chart; do
             [ -f "${chart}/Chart.yaml" ] || continue
-            # krateo-azure-aso wraps the UPSTREAM azure-service-operator chart, so its dependency
-            # must be restored before packaging or the .tgz ships without it and the operator is
-            # never deployed. `update` not `build`: build needs the repo ADDED first.
-            if grep -q "^dependencies:" "${chart}/Chart.yaml"; then
-              helm dependency update "${chart}"
-            fi
             name=$(awk '/^name:/{print $2; exit}' "${chart}/Chart.yaml")
             echo "::group::${name} (${chart})"
             sed -i "s/CHART_VERSION/${VERSION}/g" "${chart}/Chart.yaml"
+            # AFTER the version stamp, never before: helm refuses to read a chart whose version is
+            # the literal CHART_VERSION ("validation: chart.metadata.version is invalid"), so a
+            # dependency update placed earlier fails the whole release. krateo-azure-aso wraps the
+            # UPSTREAM azure-service-operator chart and must have it restored before packaging, or
+            # the .tgz ships without it and the operator is never deployed. `update` not `build`:
+            # build needs the repository ADDED first and fails on a clean runner.
+            if grep -q "^dependencies:" "${chart}/Chart.yaml"; then
+              helm dependency update "${chart}"
+            fi
             helm package "${chart}" --destination .
             # Retry: that GHCR tag error is transient and a single push failure otherwise
             # abandons every chart after it.

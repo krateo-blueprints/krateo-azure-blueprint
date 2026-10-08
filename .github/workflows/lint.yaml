@@ -26,9 +26,11 @@ jobs:
             # krateo-azure-aso WRAPS the upstream azure-service-operator chart. helm template
             # cannot render a chart whose declared dependency is absent, and the vendored
             # tarball is gitignored, so it has to be restored here. `build` honours Chart.lock's
-            # pinned digest; `update` would re-resolve and could drift from the lock.
+            # `update` not `build`: build needs the repo ADDED first and fails on a clean runner
+            # with "no repository definition for <url>". Chart.yaml pins an exact version,
+            # so re-resolving cannot drift.
             if grep -q "^dependencies:" "${tmp}/chart/Chart.yaml"; then
-              helm dependency build "${tmp}/chart" >/dev/null
+              helm dependency update "${tmp}/chart" >/dev/null
             fi
             if ! out=$(helm template release "${tmp}/chart" --namespace ci 2>&1); then
               echo "::error::${chart}"; echo "${out}" | tail -5; fail=$((fail+1))

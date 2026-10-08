@@ -63,9 +63,9 @@ jobs:
             [ -f "${chart}/Chart.yaml" ] || continue
             # krateo-azure-aso wraps the UPSTREAM azure-service-operator chart, so its dependency
             # must be restored before packaging or the .tgz ships without it and the operator is
-            # never deployed. `build` honours Chart.lock's pinned digest; `update` would re-resolve.
+            # never deployed. `update` not `build`: build needs the repo ADDED first.
             if grep -q "^dependencies:" "${chart}/Chart.yaml"; then
-              helm dependency build "${chart}"
+              helm dependency update "${chart}"
             fi
             name=$(awk '/^name:/{print $2; exit}' "${chart}/Chart.yaml")
             echo "::group::${name} (${chart})"

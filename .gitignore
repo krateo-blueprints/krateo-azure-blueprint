@@ -1,2 +1,5 @@
 *.tgz
 .DS_Store
+
+# vendored upstream chart dependencies; restored by `helm dependency build` from Chart.lock
+operator/*/charts/

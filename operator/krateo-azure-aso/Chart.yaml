@@ -1,0 +1,34 @@
+apiVersion: v2
+# Azure Service Operator (ASO) v2, the controller that reconciles every blueprint in this repo.
+#
+# A DEPENDENCY WRAPPER over the UNFORKED upstream chart, not a repackage: Azure publishes an
+# official Helm chart, so there is nothing to vendor. Contrast krateo-gcp-configconnector, which
+# repackages a YAML bundle only because Config Connector ships no chart.
+#
+# ASO installs and manages its own resource CRDs at runtime (installCRDs, crd-pattern), exactly as
+# Config Connector does — so there is NO companion -crds chart here, and none is needed. The full
+# CRD bundle upstream is ~50 MiB across 293 CRDs; shipping it as a chart would be both enormous and
+# redundant. Set crdPattern to install only the subset you use.
+name: krateo-azure-aso
+description: Azure Service Operator v2, for provisioning Azure resources from Krateo Compositions.
+type: application
+version: CHART_VERSION
+appVersion: "2.21.1"
+home: https://krateo.io
+# An ABSOLUTE https URL serving the image itself. A /blob/ URL is a GitHub HTML page, not an SVG:
+# publish-chart.yaml's channel gate only checks the https scheme, so a blob URL passes the gate and
+# renders a broken Marketplace card with nothing failing. Must also be the canonical org.
+icon: "https://raw.githubusercontent.com/krateo-platformops/.github/main/brand/logo.svg"
+keywords:
+  - azure
+  - aso
+  - azure-service-operator
+  - operator
+sources:
+  - https://github.com/krateo-blueprints/krateo-azure-blueprint
+dependencies:
+  - name: azure-service-operator
+    version: "2.21.1"
+    repository: https://raw.githubusercontent.com/Azure/azure-service-operator/main/v2/charts
+annotations:
+  krateoSupportedVersion: "2.7.0"

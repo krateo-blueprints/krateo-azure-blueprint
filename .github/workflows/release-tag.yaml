@@ -34,7 +34,7 @@ jobs:
           echo "version=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
           # Collected for publish-chart.yaml: the Marketplace index is built from the .tgz this
           # run uploads, NOT from the OCI registry, so charts pushed only to GHCR stay invisible.
-          mkdir -p "${RUNNER_TEMP}/charts-dist"
+          mkdir -p "${RUNNER_TEMP}/charts-dist" "${RUNNER_TEMP}/charts-dist-operators"
 
       - name: Log in to GHCR
         run: |
@@ -61,6 +61,12 @@ jobs:
           # row died before reaching it.
           for chart in operator/* blueprints/*/*/chart; do
             [ -f "${chart}/Chart.yaml" ] || continue
+            # krateo-azure-aso wraps the UPSTREAM azure-service-operator chart, so its dependency
+            # must be restored before packaging or the .tgz ships without it and the operator is
+            # never deployed. `build` honours Chart.lock's pinned digest; `update` would re-resolve.
+            if grep -q "^dependencies:" "${chart}/Chart.yaml"; then
+              helm dependency build "${chart}"
+            fi
             name=$(awk '/^name:/{print $2; exit}' "${chart}/Chart.yaml")
             echo "::group::${name} (${chart})"
             sed -i "s/CHART_VERSION/${VERSION}/g" "${chart}/Chart.yaml"
@@ -78,8 +84,12 @@ jobs:
               exit 1
             fi
             echo "Published ${OCI_REPO}/${name}:${VERSION}"
-            # Same bytes to the publisher.
-            cp "${name}-${VERSION}.tgz" "${RUNNER_TEMP}/charts-dist/"
+            # Same bytes to the publisher. operator/ is the controller that reconciles these
+            # blueprints and goes to the operators channel; blueprints/ to blueprints.
+            case "${chart}" in
+              operator/*)   cp "${name}-${VERSION}.tgz" "${RUNNER_TEMP}/charts-dist-operators/" ;;
+              blueprints/*) cp "${name}-${VERSION}.tgz" "${RUNNER_TEMP}/charts-dist/" ;;
+            esac
             published=$((published+1))
             echo "::endgroup::"
           done
@@ -91,6 +101,14 @@ jobs:
             exit 1
           fi
 
+      - name: Upload operator charts for the publisher
+        uses: actions/upload-artifact@v4
+        with:
+          name: charts-dist-operators
+          path: ${{ runner.temp }}/charts-dist-operators/*.tgz
+          if-no-files-found: error
+          retention-days: 1
+
       - name: Upload packaged charts for the publisher
         uses: actions/upload-artifact@v4
         with:
@@ -101,9 +119,8 @@ jobs:
           retention-days: 1
 
   # krateo-blueprints/charts uploads each package to its Releases and merges its entry into the
-  # blueprints channel index on gh-pages, which the Marketplace reads. Only the blueprints channel:
-  # this repo has no operator/ directory, and an operators upload with if-no-files-found: error
-  # would fail the job on an empty glob.
+  # channel index on gh-pages, which the Marketplace reads. Called once PER CHANNEL, as that
+  # workflow requires.
   publish-blueprints:
     needs: package-and-push
     uses: krateo-blueprints/charts/.github/workflows/publish-chart.yaml@main
@@ -113,5 +130,18 @@ jobs:
       source_repo: ${{ github.repository }}
       git_tag: ${{ needs.package-and-push.outputs.version }}
       channel: blueprints
+    secrets:
+      PUBLISH_TOKEN: ${{ secrets.CHARTS_PUBLISH_TOKEN || secrets.RELEASE_FEED_TOKEN }}
+
+  publish-operators:
+    needs: package-and-push
+    uses: krateo-blueprints/charts/.github/workflows/publish-chart.yaml@main
+    permissions:
+      contents: read
+    with:
+      source_repo: ${{ github.repository }}
+      git_tag: ${{ needs.package-and-push.outputs.version }}
+      channel: operators
+      artifact: charts-dist-operators
     secrets:
       PUBLISH_TOKEN: ${{ secrets.CHARTS_PUBLISH_TOKEN || secrets.RELEASE_FEED_TOKEN }}

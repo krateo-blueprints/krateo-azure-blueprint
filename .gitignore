@@ -3,3 +3,9 @@
 
 # vendored upstream chart dependencies; restored by `helm dependency build` from Chart.lock
 operator/*/charts/
+# compiled generator binaries: build from tools/<name>/ with `go build` instead.
+# tools/asogen/asogen was committed as an 11 MB Mach-O arm64 executable, which could not
+# run in CI (ubuntu-latest is linux/amd64) and is rebuilt from the Go source beside it.
+tools/*/asogen
+tools/*/ackgen
+tools/*/kccgen

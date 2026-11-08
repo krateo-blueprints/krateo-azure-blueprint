@@ -30,20 +30,25 @@ leave it empty to inherit the credential from the namespace.
 
 ## How to install
 
+Register it with the CompositionDefinition attached to a release of this repository, stamped
+with that release's chart version. The `compositiondefinition.yaml` beside this README carries
+the `CHART_VERSION` placeholder, which only the release replaces, so it is not meant to be applied.
+
 ```sh
+VERSION=X.Y.Z   # a release of this repository: https://github.com/krateo-blueprints/krateo-azure-blueprint/releases
 kubectl create namespace azure-network-frontdoor-system
-kubectl apply -f compositiondefinition.yaml   # publishes the AzureNetworkFrontdoorWebapplicationfirewallpolicy type
+kubectl apply -f "https://github.com/krateo-blueprints/krateo-azure-blueprint/releases/download/${VERSION}/compositiondefinition-azure-network-frontdoor-webapplicationfirewallpolicy.yaml"   # publishes the AzureNetworkFrontdoorWebapplicationfirewallpolicy type
 kubectl apply -f customform.yaml              # optional: portal card + form
 ```
 
-This publishes a `AzureNetworkFrontdoorWebapplicationfirewallpolicy` Composition type (`composition.krateo.io/v0-1-0`,
-plural `azurenetworkfrontdoorwebapplicationfirewallpolicies`), pulling the chart from
-`oci://ghcr.io/krateo-blueprints/charts/azure-network-frontdoor-webapplicationfirewallpolicy`.
+This publishes a `AzureNetworkFrontdoorWebapplicationfirewallpolicy` Composition type (`composition.krateo.io/vX-Y-Z`, the release
+version with dashes, e.g. `0.1.6` → `v0-1-6`; plural `azurenetworkfrontdoorwebapplicationfirewallpolicies`), pulling the chart from
+`oci://ghcr.io/krateo-blueprints/charts/azure-network-frontdoor-webapplicationfirewallpolicy` at that version.
 
 ### Create a Composition
 
 ```yaml
-apiVersion: composition.krateo.io/v0-1-0
+apiVersion: composition.krateo.io/vX-Y-Z   # VERSION with dashes, e.g. v0-1-6
 kind: AzureNetworkFrontdoorWebapplicationfirewallpolicy
 metadata:
   name: my-webapplicationfirewallpolicy

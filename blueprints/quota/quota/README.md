@@ -30,20 +30,25 @@ leave it empty to inherit the credential from the namespace.
 
 ## How to install
 
+Register it with the CompositionDefinition attached to a release of this repository, stamped
+with that release's chart version. The `compositiondefinition.yaml` beside this README carries
+the `CHART_VERSION` placeholder, which only the release replaces, so it is not meant to be applied.
+
 ```sh
+VERSION=X.Y.Z   # a release of this repository: https://github.com/krateo-blueprints/krateo-azure-blueprint/releases
 kubectl create namespace azure-quota-system
-kubectl apply -f compositiondefinition.yaml   # publishes the AzureQuotaQuota type
+kubectl apply -f "https://github.com/krateo-blueprints/krateo-azure-blueprint/releases/download/${VERSION}/compositiondefinition-azure-quota-quota.yaml"   # publishes the AzureQuotaQuota type
 kubectl apply -f customform.yaml              # optional: portal card + form
 ```
 
-This publishes a `AzureQuotaQuota` Composition type (`composition.krateo.io/v0-1-0`,
-plural `azurequotaquotas`), pulling the chart from
-`oci://ghcr.io/krateo-blueprints/charts/azure-quota-quota`.
+This publishes a `AzureQuotaQuota` Composition type (`composition.krateo.io/vX-Y-Z`, the release
+version with dashes, e.g. `0.1.6` → `v0-1-6`; plural `azurequotaquotas`), pulling the chart from
+`oci://ghcr.io/krateo-blueprints/charts/azure-quota-quota` at that version.
 
 ### Create a Composition
 
 ```yaml
-apiVersion: composition.krateo.io/v0-1-0
+apiVersion: composition.krateo.io/vX-Y-Z   # VERSION with dashes, e.g. v0-1-6
 kind: AzureQuotaQuota
 metadata:
   name: my-quota
